@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <!-- loop through books (Jinja2 engine) -->
+    <!-- books variable "books=smth" is the name of passed argument in render_template -->
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        <fieldset class="form-group">
+            <div class="row">
+                <div class="form-group col-sm-10">
+                    {{ form.search_value(class="form-control form-control-lg") }}
+                </div>
+                <div class="form-group col-sm-2">
+                    {{ form.submit(class="btn btn-outline-success btn-lg") }}
+                </div>
+            </div>
+        </fieldset>
+<!--        <input class="form-control mb-3" id="myInput" type="text" placeholder="Search..">-->
+    </form>
+
+    <ul class="list-group" id="myList">
+        {% for book in books.items %}
+        <div class="">
+            <a href="{{ url_for('book_info', book_id=book.bid) }}" class="list-group-item list-group-item-action">
+                <h5>{{ book.title }} </h5>
+                <div class="author-box-intro small text-muted">{{ book.author }}</div>
+            </a>
+        </div>
+        {% endfor %}
+    </ul>
+    {% for page_num in books.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+        {% if page_num %}
+            {% if books.page == page_num %}
+                <a class="btn btn-success mb-4 mt-2" href="{{ url_for('search_results', page=page_num, search_value=search_value) }}">{{ page_num }}</a>
+            {% else %}
+                <a class="btn btn-outline-success mb-4 mt-2" href="{{ url_for('search_results', page=page_num, search_value=search_value) }}">{{ page_num }}</a>
+            {% endif %}
+        {% else %}
+            ...
+        {% endif %}
+    {% endfor %}
+{% endblock content %}

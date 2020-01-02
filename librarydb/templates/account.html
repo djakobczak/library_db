@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block content %}
+    <div class="content-section">
+        <div class="border-bottom">
+            {% if current_user.is_admin == true %}
+                <h4>Panel administratora</h4>
+            {% else %}
+                <h4>Panel czytelnika</h4>
+            {% endif %}
+        </div>
+        <dl class="row mt-3">
+            <dt class="col-md-5">Imię:</dt>
+            <dd class="col-md-7">{{ current_user.name }}</dd>
+
+            <dt class="col-md-5">Nazwisko:</dt>
+            <dd class="col-md-7">{{ current_user.surname }}</dd>
+
+            <dt class="col-md-5">Email:</dt>
+            <dd class="col-md-7">{{ current_user.email }}</dd>
+        </dl>
+        {% if current_user.is_admin == true %}
+        <div class="mt-2 border-top">
+                <a class="btn btn-success mt-3" href="{{ url_for('new_book') }}" role="button">Dodaj książkę</a>
+        </div>
+        {% endif %}
+
+    </div>
+<!-- List of books that user borrowed -->
+{% endblock content %}

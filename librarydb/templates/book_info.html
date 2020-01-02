@@ -1,0 +1,60 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="content-section">
+    <div class="border-bottom">
+        <h3>Informacje o książce</h3>
+    </div>
+    <dl class="row mt-3">
+        <dt class="col-md-3">Tytuł:</dt>
+        <dd class="col-md-9">{{ book.title }}</dd>
+
+        <dt class="col-md-3">Autor:</dt>
+        <dd class="col-md-9">{{ book.author }}</dd>
+
+        <dt class="col-md-3">Kateogria:</dt>
+        {% if book.category %}
+            <dd class="col-md-9">{{ book.category }}</dd>
+        {% else %}
+            <dd class="col-md-9">-</dd>
+        {% endif %}
+
+        <dt class="col-md-3">Dostępnych:</dt>
+        <dd class="col-md-9">{{ book.count }}</dd>
+
+        <dt class="col-md-3">Opis:</dt>
+        {% if book.description %}
+            <dd class="col-md-9">{{ book.description }}</dd>
+        {% else %}
+            <dd class="col-md-9">-</dd>
+        {% endif %}
+    </dl>
+    <!--  show update book button if current user is admin  -->
+    {% if current_user.is_admin %}
+    <div class="row">
+        <div class="ml-auto mr-2">
+            <a class="btn btn-secondary" href="{{ url_for('update_book', book_id=book.bid) }}" role="button">Zmień</a>
+            <button type="button" class="btn btn-danger m-1" data-toggle="modal" data-target="#deleteModal">Usuń</button>
+        </div>
+    </div>
+    {% endif %}
+</div>
+<!-- Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">Czy na pewno chcesz usunąć tę książkę?</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Nie</button>
+          <form action="{{ url_for('delete_book', book_id=book.bid) }}" method="POST">
+              <input class="btn btn-danger" type="submit" value="Usuń">
+          </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

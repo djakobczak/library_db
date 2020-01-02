@@ -1,2 +1,2 @@
-# library_db
+# Projekt z baz danych - biblioteka
  
