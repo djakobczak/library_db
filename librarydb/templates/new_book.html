@@ -19,59 +19,88 @@
                         {{ form.title(class="form-control form-control-lg") }}
                     {% endif %}
                 </div>
-                <div class="form-group">
-                    {{ form.author.label(class="form-control-label") }}
-                    {% if form.author.errors %}
-                        {{ form.author(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in form.author.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ form.author(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
 
                  <div class="form-group">
-                    {{ form.category.label(class="form-control-label") }}
-                    {% if form.category.errors %}
-                        {{ form.category(class="form-control form-control-lg is-invalid") }}
+                    {{ form.aid.label(class="form-control-label") }}
+                    {% if form.aid.errors %}
+                        {{ form.aid(class="form-control form-control-lg is-invalid") }}
                         <div class="invalid-feedback">
-                            {% for error in form.category.errors %}
+                            {% for error in form.aid.errors %}
                                 <span>{{ error }}</span>
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ form.category(class="form-control form-control-lg") }}
+                        {{ form.aid(class="form-control form-control-lg") }}
                     {% endif %}
                 </div>
 
                 <div class="form-group">
-                    {{ form.count.label(class="form-control-label") }}
-                    {% if form.count.errors %}
-                        {{ form.count(class="form-control form-control-lg is-invalid") }}
+                    {{ form.pid.label(class="form-control-label") }}
+                    {% if form.pid.errors %}
+                        {{ form.pid(class="form-control form-control-lg is-invalid") }}
                         <div class="invalid-feedback">
-                            {% for error in form.count.errors %}
+                            {% for error in form.pid.errors %}
                                 <span>{{ error }}</span>
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ form.count(class="form-control form-control-lg") }}
+                        {{ form.pid(class="form-control form-control-lg") }}
                     {% endif %}
                 </div>
 
                 <div class="form-group">
-                    {{ form.description.label(class="form-control-label") }}
-                    {% if form.description.errors %}
-                        {{ form.description(class="form-control form-control-lg is-invalid") }}
+                    {{ form.premiere_date.label(class="form-control-label") }}
+                    {% if form.premiere_date.errors %}
+                        {{ form.premiere_date(class="form-control form-control-lg is-invalid") }}
                         <div class="invalid-feedback">
-                            {% for error in form.description.errors %}
+                            {% for error in form.premiere_date.errors %}
                                 <span>{{ error }}</span>
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ form.description(class="form-control form-control-lg") }}
+                        {{ form.premiere_date(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.publication_date.label(class="form-control-label") }}
+                    {% if form.publication_date.errors %}
+                        {{ form.publication_date(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.publication_date.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.publication_date(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.ean.label(class="form-control-label") }}
+                    {% if form.ean.errors %}
+                        {{ form.ean(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.ean.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.ean(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.lang_id.label(class="form-control-label") }}
+                    {% if form.lang_id.errors %}
+                        {{ form.lang_id(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.lang_id.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.lang_id(class="form-control form-control-lg") }}
                     {% endif %}
                 </div>
 

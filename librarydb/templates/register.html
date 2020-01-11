@@ -50,6 +50,20 @@
 
                 </div>
                 <div class="form-group">
+                    {{ form.address.label(class="form-control-label") }}
+                    {% if form.address.errors %}
+                        {{ form.address(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.address.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.address(class="form-control form-control-lg") }}
+                    {% endif %}
+
+                </div>
+                <div class="form-group">
                     {{ form.email.label(class="form-control-label") }}
                     {% if form.email.errors %}
                         {{ form.email(class="form-control form-control-lg is-invalid") }}
@@ -62,6 +76,21 @@
                         {{ form.email(class="form-control form-control-lg") }}
                     {% endif %}
                 </div>
+                <div class="form-group">
+                    {{ form.username .label(class="form-control-label") }}
+                    {% if form.username .errors %}
+                        {{ form.username (class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.username .errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.username (class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                <!-- if admin is logged in that means he accessed this page in order to change update user account -->
+                {% if not current_user.typ_konta_id == ADMIN_ID %}
                 <div class="form-group">
                     {{ form.password.label(class="form-control-label") }}
                     {% if form.password.errors %}
@@ -89,6 +118,7 @@
                         {{ form.confirm_password(class="form-control form-control-lg") }}
                     {% endif %}
                 </div>
+                {% endif %}
             </fieldset>
             <div class="form-group">
                 {{ form.submit(class="btn btn-outline-info") }}
@@ -97,7 +127,7 @@
         <!-- padding top 3, url_for(function name) -->
         <div class="border-top pt-3">
             <small class="text-muted">
-                Posiadasz już konto? <a class="ml-2" href="{{ url_for('login') }}">Zaloguj się</a>
+                Posiadasz już konto? <a class="ml-2" href="{{ url_for('users.login') }}">Zaloguj się</a>
             </small>
         </div>
     </div>

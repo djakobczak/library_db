@@ -6,34 +6,52 @@
     </div>
     <dl class="row mt-3">
         <dt class="col-md-3">Tytuł:</dt>
-        <dd class="col-md-9">{{ book.title }}</dd>
+        <dd class="col-md-9">{{ book.tytul }}</dd>
 
         <dt class="col-md-3">Autor:</dt>
-        <dd class="col-md-9">{{ book.author }}</dd>
+        <dd class="col-md-9">{{ book.autor.imie + ' ' + book.autor.nazwisko}}</dd>
 
-        <dt class="col-md-3">Kateogria:</dt>
-        {% if book.category %}
-            <dd class="col-md-9">{{ book.category }}</dd>
+        <dt class="col-md-3">Wydawca:</dt>
+        {% if book.wydawca.nazwa %}
+            <dd class="col-md-9">{{ book.wydawca.nazwa }}</dd>
         {% else %}
             <dd class="col-md-9">-</dd>
         {% endif %}
 
-        <dt class="col-md-3">Dostępnych:</dt>
-        <dd class="col-md-9">{{ book.count }}</dd>
-
-        <dt class="col-md-3">Opis:</dt>
-        {% if book.description %}
-            <dd class="col-md-9">{{ book.description }}</dd>
+        <dt class="col-md-3">Data premiery:</dt>
+        {% if book.data_premiery %}
+        <dd class="col-md-9">{{ book.data_premiery.strftime('%Y-%m-%d') }}</dd>
         {% else %}
             <dd class="col-md-9">-</dd>
         {% endif %}
+
+        <dt class="col-md-3">Rok wydania:</dt>
+        {% if book.rok_wydania %}
+        <dd class="col-md-9">{{ book.rok_wydania }}</dd>
+        {% else %}
+            <dd class="col-md-9">-</dd>
+        {% endif %}
+
+        <dt class="col-md-3">Jezyk:</dt>
+        <dd class="col-md-9"> {{ book.jezyk.jezyk }}</dd>
+
+        <dt class="col-md-3">Ilość:</dt>
+        <dd class="col-md-9"> {{ book_count }}</dd>
+
     </dl>
     <!--  show update book button if current user is admin  -->
-    {% if current_user.is_admin %}
+    {% if current_user.typ_konta_id == ADMIN_ID %}
     <div class="row">
         <div class="ml-auto mr-2">
-            <a class="btn btn-secondary" href="{{ url_for('update_book', book_id=book.bid) }}" role="button">Zmień</a>
+            <a class="btn btn-secondary" href="{{ url_for('books.update_book', book_id=book.id) }}" role="button">Zmień</a>
             <button type="button" class="btn btn-danger m-1" data-toggle="modal" data-target="#deleteModal">Usuń</button>
+        </div>
+    </div>
+    {% elif current_user.typ_konta.id == USER_ID %}
+    <!-- book reservation -->
+    <div class="row">
+        <div class="ml-auto mr-2">
+            <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#reserveModal">Rezerwuj</button>
         </div>
     </div>
     {% endif %}
@@ -50,8 +68,27 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Nie</button>
-          <form action="{{ url_for('delete_book', book_id=book.bid) }}" method="POST">
+          <form action="{{ url_for('books.delete_book', book_id=book.id) }}" method="POST">
               <input class="btn btn-danger" type="submit" value="Usuń">
+          </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="reserveModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="reserveModalLabel">Czy na pewno chcesz zarezerwować tę książkę?</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Nie</button>
+          <form action="{{ url_for('books.reserve', book_id=book.id) }}" method="POST">
+              <input class="btn btn-danger" type="submit" value="Rezerwuj">
           </form>
       </div>
     </div>

@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+{% block content %}
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        <fieldset class="form-group">
+            <div class="row">
+                <div class="form-group col-sm-10">
+                    {{ form.search_value(class="form-control form-control-lg") }}
+                </div>
+                <div class="form-group col-sm-2">
+                    {{ form.submit(class="btn btn-outline-success btn-lg") }}
+                </div>
+            </div>
+        </fieldset>
+    </form>
+
+    <div class="content-section">
+        <table class="table table-sm table-hover table-borderless">
+        <thead>
+        <tr>
+          <th scope="col" class="border-bottom">#</th>
+          <th scope="col" class="border-bottom">Imię</th>
+          <th scope="col" class="border-bottom">Nazwisko</th>
+          <th scope="col" class="border-bottom">Nazwa uzytkownika</th>
+          <th scope="col" class="border-bottom">Biblioteka</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        {% for user in users.items %}
+        <!-- onclick just to omit jquery -->
+        <tr onclick="window.location='{{ url_for('users.user_info', uid=user.id) }}';" style="cursor: pointer;">
+            <th scope="row">{{ user.id }}</td>
+            <td>{{ user.imie }}</td>
+            <td>{{ user.nazwisko }}</td>
+            <td>{{ user.nazwa_uzytkownika }}</td>
+            <td>{{ user.biblioteka.nazwa }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+    </div>
+
+    {% for page_num in users.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+        {% if page_num %}
+            {% if users.page == page_num %}
+                <a class="btn btn-success mb-4 mt-2" href="{{ url_for('users.users_list', page=page_num, results=users) }}">{{ page_num }}</a>
+            {% else %}
+                <a class="btn btn-outline-success mb-4 mt-2" href="{{ url_for('users.users_list', page=page_num, results=users) }}">{{ page_num }}</a>
+            {% endif %}
+        {% else %}
+            ...
+        {% endif %}
+    {% endfor %}
+
+
+{% endblock content %}

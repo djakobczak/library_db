@@ -12,6 +12,7 @@
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 </head>
 <body>
     <header class="site-header">
@@ -26,17 +27,17 @@
           <div class="collapse navbar-collapse" id="navbarToggle">
             <!-- margin right auto pushes "Logowanie" "Rejestracja" to the right -->
             <div class="navbar-nav mr-auto">
-              <a class="nav-item nav-link" href="{{ url_for('home') }}">Strona główna</a>
-              <a class="nav-item nav-link" href="{{ url_for('books') }}">Książki</a>
+              <a class="nav-item nav-link" href="{{ url_for('main.home') }}">Strona główna</a>
+              <a class="nav-item nav-link" href="{{ url_for('books.books_list') }}">Książki</a>
             </div>
             <!-- Navbar Right Side -->
             <div class="navbar-nav">
                 {% if current_user.is_authenticated %}
-                    <a class="nav-item nav-link" href="{{ url_for('account') }}">Konto</a>
-                    <a class="nav-item nav-link" href="{{ url_for('logout') }}">Wyloguj</a>
+                    <a class="nav-item nav-link" href="{{ url_for('users.account') }}">Konto</a>
+                    <a class="nav-item nav-link" href="{{ url_for('users.logout') }}">Wyloguj</a>
                 {% else %}
-                    <a class="nav-item nav-link" href="{{ url_for('login') }}">Logowanie</a>
-                    <a class="nav-item nav-link" href="{{ url_for('register') }}">Rejestracja</a>
+                    <a class="nav-item nav-link" href="{{ url_for('users.login') }}">Logowanie</a>
+                    <a class="nav-item nav-link" href="{{ url_for('users.register') }}">Rejestracja</a>
                 {% endif %}
             </div>
           </div>

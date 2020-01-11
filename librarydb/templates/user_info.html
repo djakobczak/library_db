@@ -2,33 +2,38 @@
 {% block content %}
     <div class="content-section">
         <div class="border-bottom">
-            {% if current_user.typ_konta_id == ADMIN_ID %}
-                <h4>Panel administratora</h4>
-            {% else %}
-                <h4>Panel czytelnika</h4>
-            {% endif %}
+            <h4>Panel administratora - informacje o użytkowniku</h4>
         </div>
         <dl class="row mt-3">
             <dt class="col-md-5">Imię:</dt>
-            <dd class="col-md-7">{{ current_user.imie }}</dd>
+            <dd class="col-md-7">{{ user.imie }}</dd>
 
             <dt class="col-md-5">Nazwisko:</dt>
-            <dd class="col-md-7">{{ current_user.nazwisko }}</dd>
+            <dd class="col-md-7">{{ user.nazwisko }}</dd>
+
+            <dt class="col-md-5">Pesel:</dt>
+            <dd class="col-md-7">{{ user.pesel }}</dd>
 
             <dt class="col-md-5">Email:</dt>
-            <dd class="col-md-7">{{ current_user.email }}</dd>
+            <dd class="col-md-7">{{ user.email }}</dd>
 
             <dt class="col-md-5">Adres:</dt>
-            <dd class="col-md-7">{{ current_user.adres }}</dd>
+            <dd class="col-md-7">{{ user.adres }}</dd>
+
+            <dt class="col-md-5">Nazwa użytkownika:</dt>
+            <dd class="col-md-7">{{ user.nazwa_uzytkownika }}</dd>
+
+            <dt class="col-md-5">Typ konta:</dt>
+            <dd class="col-md-7">{{ user.typ_konta.typ_konta }}</dd>
+
+            <dt class="col-md-5">Biblioteka:</dt>
+            <dd class="col-md-7">{{ user.biblioteka.nazwa }}</dd>
         </dl>
-        {% if current_user.typ_konta_id == ADMIN_ID %}
         <div class="mt-2 border-top">
             <div class="ml-auto mr-2">
-                <a class="btn btn-success mt-3" href="{{ url_for('books.new_book') }}" role="button">Dodaj książkę</a>
-                <a class="btn btn-secondary mt-3 ml-2" href="{{ url_for('users.users_list') }}" role="button">Lista czytelników</a>
+                <a class="btn btn-success mt-3" href="{{ url_for('users.update_account', uid=user.id) }}" role="button">Zmień dane</a>
             </div>
         </div>
-        {% endif %}
     </div>
 
     <!-- Information about books (reservation, penalties etc.) -->
@@ -53,7 +58,7 @@
             <td>{{ res['data_rezerwacji'].strftime("%H:%M %Y-%m-%d") }}</td>
 
             <td>
-                <form action="{{ url_for('books.remove_reservation', bcid=res['ksiazka_id'], uid=current_user.id) }}" method="POST">
+                <form action="{{ url_for('books.remove_reservation', bcid=res['ksiazka_id'], uid=user.id) }}" method="POST">
                     <input id="removeBtn" class="btn btn-danger btn-sm"  type="submit" value="Odwołaj">
                 </form>
             </td>
