@@ -6,9 +6,8 @@ from sqlalchemy import text
 from datetime import datetime
 
 from librarydb import app, db
-from librarydb.books.forms import SearchForm, NewBookForm
-from librarydb.books.utils import available_books
-from librarydb.database import DatabaseMethods
+from librarydb.books.forms import SearchForm, NewBookForm, NewAuthorForm, AddCopiesForm
+from librarydb.books.utils import available_books, insert_author, BooksDb
 from librarydb.models import Ksiazki, Egzemplarze, Rezerwacje, Wypozyczenia
 from librarydb.settings import *
 
@@ -62,16 +61,12 @@ def book_info(book_id):
     if not book:
         abort(404)
 
-    # book_count = db.session.query(func.count(Egzemplarze.id)).filter(
-    #     Egzemplarze.ksiazka_id == book_id).scalar()  # find number of not borrowed books !TODO check reservations
-    # reservation_count = db.session.query(func.count(Rezerwacje.id)).filter(
-    #     Rezerwacje.ksiazka_id == book_id).scalar()
-    # borrowed_count = db.session.query(func.count(Wypozyczenia.id)).filter(
-    #     Wypozyczenia.egzemplarz_id == book_id).scalar()
-    # abooks = book_count - reservation_count - borrowed_count
     abooks = available_books(db, book_id)
+    copies = BooksDb.get_copies(book_id)
+    print(copies)
 
-    return render_template('book_info.html', book=book, book_count=abooks, ADMIN_ID=ADMIN_ID, USER_ID=USER_ID)
+    return render_template('book_info.html', book=book, book_count=abooks, copies=copies,
+                           ADMIN_ID=ADMIN_ID, USER_ID=USER_ID)
 
 
 @books.route("/book/<int:book_id>/update", methods=['GET', 'POST'])
@@ -87,7 +82,7 @@ def update_book(book_id):
         # ans = update_book_db(book_id=book_id, title=form.title.data, author=form.author.data,
         #                      category=form.category.data,
         #                      count=form.count.data, description=form.description.data)
-        ans = DatabaseMethods.update_book(book=book, title=form.title.data, aid=form.aid.data,
+        ans = BooksDb.update_book(book=book, title=form.title.data, aid=form.aid.data,
                                           pid=form.pid.data, premiere_date=form.premiere_date.data,
                                           publ_year=form.publication_date.data, ean=form.ean.data,
                                           lang_id=form.lang_id.data)
@@ -142,7 +137,7 @@ def new_book():
     if form.validate_on_submit():
         # ans = insert_book(title=form.title.data, author=form.author.data, category=form.category.data,
         #                   count=form.count.data, description=form.description.data)
-        ans = DatabaseMethods.insert_book(title=form.title.data, aid=form.aid.data,
+        ans = BooksDb.insert_book(title=form.title.data, aid=form.aid.data,
                                           pid=form.pid.data, premiere_date=form.premiere_date.data,
                                           publ_year=form.publication_date.data, ean=form.ean.data,
                                           lang_id=form.lang_id.data)
@@ -152,7 +147,23 @@ def new_book():
             return redirect(url_for('books.new_book'))  # flush fields, simple but slow
         else:
             flash(ROLLBACK_MSG, 'danger')
-    return render_template('new_book.html', form=form, legend='Dodaj nową książkę')
+    return render_template('new_book.html', form=form, legend='Dodaj nową książkę do bazy')
+
+
+@books.route("/account/new-author", methods=['GET', 'POST'])
+@login_required
+def new_author():
+    if current_user.typ_konta_id != ADMIN_ID:  # if common user tries to add book -> content forbidden
+        abort(403)
+    form = NewAuthorForm()
+    if form.validate_on_submit():
+        ans = insert_author(form)
+        if ans:
+            flash('Autor została dodana do bazy', 'success')
+            return redirect(url_for('books.new_author'))  # flush fields, simple but slow
+        else:
+            flash(ROLLBACK_MSG, 'danger')
+    return render_template('new_author.html', form=form, legend='Dodaj nowego autora do bazy')
 
 
 @books.route("/book/reserve/<int:book_id>", methods=['POST'])
@@ -185,4 +196,24 @@ def remove_reservation(bcid, uid):     # bcid = book copy id
     db.session.delete(res)
     db.session.commit()
     flash('Odwołano rezerwacje', 'danger')
-    return redirect(url_for('users.account'))
+    return redirect(url_for('users.user_info', uid=uid))
+
+
+@books.route("/account/add-copies", methods=['GET', 'POST'])
+@login_required
+def add_copies():
+    if current_user.typ_konta_id != ADMIN_ID:  # if common user tries to add book -> content forbidden
+        abort(403)
+    form = AddCopiesForm()
+    if form.validate_on_submit():
+        ans = BooksDb.add_copies(form)
+
+        if ans:
+            flash('Egzemplarze zostały dodane do bazy', 'success')
+            app.logger.info('Coppies of book with id % added', form.bid.data)  # should be id
+            return redirect(url_for('books.add_copies'))  # flush fields, simple but slow
+        else:
+            flash(ROLLBACK_MSG, 'danger')
+    return render_template('add_copies.html', form=form, legend='Dodaj egzemplarze do bazy')
+
+

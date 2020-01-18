@@ -56,6 +56,42 @@
     </div>
     {% endif %}
 </div>
+
+{% if current_user.typ_konta_id == ADMIN_ID %}
+    <div class="content-section">
+        <div class="border-bottom">
+            <h4>Wszystkie egzemplarze</h4>
+        </div>
+        {% if copies %}
+        <table class="table table-borderless table-sm table-hover">
+        <thead>
+        <tr>
+          <th scope="col" class="border-bottom">ID</th>
+          <th scope="col" class="border-bottom">Stan</th>
+          <th scope="col" class="border-bottom">Akcja</th>
+        </tr>
+        </thead>
+
+        <tbody>
+            {% for cop in copies %}
+            <tr>
+                <td>{{ cop.id }}</td>
+                <td>{{ cop.tytul }}</td>
+                <td>{{ cop.imie }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        </table>
+        {% else %}
+        <div class="m-2">
+            Brak
+        </div>
+        {% endif %}
+    </div>
+{% endif %}
+
+
+<!-- ********************************************************************************* -->
 <!-- Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
@@ -76,6 +112,8 @@
   </div>
 </div>
 
+
+<!-- MODAL -->
 <div class="modal fade" id="reserveModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">

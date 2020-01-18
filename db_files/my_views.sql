@@ -28,7 +28,7 @@ CREATE OR REPLACE VIEW v_ksiazki_kategoria as
 	ORDER BY kat.kategoria;
 
 CREATE OR REPLACE VIEW v_egzemplarze as
-	SELECT e.id, k.tytul, a.imie, a.nazwisko, b.nazwa
+	SELECT e.id, k.tytul, a.imie, a.nazwisko, b.nazwa, k.id AS ksiazka_id
 	FROM egzemplarze e
 	INNER JOIN ksiazki k ON k.id = e.ksiazka_id
 	INNER JOIN autor a ON a.id = k.autor_id
@@ -36,7 +36,8 @@ CREATE OR REPLACE VIEW v_egzemplarze as
 	ORDER BY k.tytul, a.nazwisko;
 
 CREATE OR REPLACE VIEW v_platnosci as
-	SELECT p.id, p.data_platnosci, u.nazwa_uzytkownika, ks.tytul, tk.typ_kary, e.id as egzemplarz_id
+	SELECT p.id, p.data_platnosci, u.id AS user_id, u.nazwa_uzytkownika, ks.tytul,
+	 				tk.typ_kary, e.id as egzemplarz_id, tk.wysokosc
 	FROM platnosci p
 	INNER JOIN kary k ON k.id = p.id_kary
 	INNER JOIN uzytkownicy u ON u.id = k.uzytkownik_id

@@ -47,7 +47,7 @@
     <!-- CONTENT BLOCK - ANY NAME IS GOOD -->
     <main role="main" class="container">
       <div class="row">
-        <div class="col-md-9">
+        <div class="col-md-12">
             <!-- with_categories allows us to get the bootstrap class e.g. success, due to use of that we get 2 values to loop through -->
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
@@ -60,19 +60,19 @@
             {% endwith %}
             {% block content %}{% endblock %}
         </div>
-        <div class="col-md-3">
-          <div class="content-section">
-            <h3>Our Sidebar</h3>
-            <p class='text-muted'>You can put any information here you'd like.
-              <ul class="list-group">
-                <li class="list-group-item list-group-item-light">Latest Posts</li>
-                <li class="list-group-item list-group-item-light">Announcements</li>
-                <li class="list-group-item list-group-item-light">Calendars</li>
-                <li class="list-group-item list-group-item-light">etc</li>
-              </ul>
-            </p>
-          </div>
-        </div>
+<!--        <div class="col-md-3">-->
+<!--          <div class="content-section">-->
+<!--            <h3>Our Sidebar</h3>-->
+<!--            <p class='text-muted'>You can put any information here you'd like.-->
+<!--              <ul class="list-group">-->
+<!--                <li class="list-group-item list-group-item-light">Latest Posts</li>-->
+<!--                <li class="list-group-item list-group-item-light">Announcements</li>-->
+<!--                <li class="list-group-item list-group-item-light">Calendars</li>-->
+<!--                <li class="list-group-item list-group-item-light">etc</li>-->
+<!--              </ul>-->
+<!--            </p>-->
+<!--          </div>-->
+<!--        </div>-->
       </div>
     </main>
 

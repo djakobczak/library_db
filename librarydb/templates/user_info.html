@@ -32,6 +32,7 @@
         <div class="mt-2 border-top">
             <div class="ml-auto mr-2">
                 <a class="btn btn-success mt-3" href="{{ url_for('users.update_account', uid=user.id) }}" role="button">Zmień dane</a>
+                <a class="btn btn-danger mt-3 ml-2" href="{{ url_for('users.penalize_user', uid=user.id) }}" role="button">Dodaj karę</a>
             </div>
         </div>
     </div>
@@ -82,8 +83,8 @@
         <table class="table table-borderless table-sm table-hover">
         <thead>
         <tr>
-          <th scope="col" class="border-bottom">Nazwa książki</th>
-          <th scope="col" class="border-bottom">Data wypożyczenia</th>
+          <th scope="col" class="border-bottom text-left">Nazwa książki</th>
+          <th scope="col" class="border-bottom text-right pr-5">Data wypożyczenia</th>
         </tr>
         </thead>
 
@@ -91,7 +92,7 @@
         {% for book in bbooks %}
         <tr>
             <td>{{ book[1] }}</td>
-            <td>{{ book[2].strftime("%H:%M %Y-%m-%d") }}</td>
+            <td class="text-right pr-5">{{ book[2].strftime("%H:%M %Y-%m-%d") }}</td>
         </tr>
         {% endfor %}
         </tbody>
@@ -103,4 +104,82 @@
         {% endif %}
     </div>
 
+    <!-- list of penalties -->
+    <div class="content-section">
+            <div class="border-bottom">
+                <h4>Kary nieopłacone</h4>
+            </div>
+            {% if penalties %}
+            <table class="table table-borderless table-sm table-hover">
+            <thead>
+            <tr>
+              <th scope="col" class="border-bottom col-2">ID egzemplarza</th>
+              <th scope="col" class="border-bottom col-2">Tytuł</th>
+              <th scope="col" class="border-bottom col-3">Typ kary</th>
+              <th scope="col" class="border-bottom col-2">Opłata</th>
+              <th scope="col" class="border-bottom text-center pl-4 col-3">Akcja</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            {% for pen in penalties %}
+            <tr>
+                <td>{{ pen['copyid'] }}</td>
+                <td>{{ pen['title'] }}</td>
+                <td>{{ pen['pen_type'] }}</td>
+                <td>{{ pen['amount']|string }}</td>
+                <td class="text-right pr-5">
+                <div class="btn-group ">
+                    <form action="{{ url_for('users.cancel_penalty', uid=user.id, pid=pen['pid']) }}" method="POST">
+                        <input id="cancelBtn" class="btn btn-outline-danger btn-sm mr-2 ml-4"  type="submit" value="Wycofaj">
+                    </form>
+                    <form action="{{ url_for('users.pay_penalty', uid=user.id, pid=pen['pid']) }}" method="POST">
+                        <input id="paymentBtn" class="btn btn-outline-success btn-sm"  type="submit" value="Płatność">
+                    </form>
+                </div>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+            </table>
+            {% else %}
+            <div class="m-2">
+                Brak
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- list of payments -->
+        <div class="content-section">
+            <div class="border-bottom">
+                <h4>Historia platnosci</h4>
+            </div>
+            {% if payments %}
+            <table class="table table-borderless table-sm table-hover">
+            <thead>
+            <tr class="d-flex">
+              <th scope="col" class="border-bottom col-2">Tytuł</th>
+              <th scope="col" class="border-bottom col-5">Typ kary</th>
+              <th scope="col" class="border-bottom col-2">Opłata</th>
+              <th scope="col" class="border-bottom col-3 text-right pr-5">Data platności</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            {% for pay in payments %}
+            <tr class="d-flex">
+                <td class="col-sm-2">{{ pay['title'] }}</td>
+                <td class="col-sm-5">{{ pay['pen_type'] }}</td>
+                <td class="col-sm-2">{{ pay['amount'] }}</td>
+                <td class="col-sm-3 text-right pr-5" >{{ pay['pay_date'].strftime("%H:%M %Y-%m-%d") }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+            </table>
+            {% else %}
+            <div class="m-2">
+                Brak
+            </div>
+            {% endif %}
+        </div>
 {% endblock content %}

@@ -20,11 +20,16 @@
 
             <dt class="col-md-5">Adres:</dt>
             <dd class="col-md-7">{{ current_user.adres }}</dd>
+
+            <dt class="col-md-5">Biblioteka:</dt>
+            <dd class="col-md-7">{{ current_user.biblioteka.nazwa }}</dd>
         </dl>
         {% if current_user.typ_konta_id == ADMIN_ID %}
         <div class="mt-2 border-top">
             <div class="ml-auto mr-2">
                 <a class="btn btn-success mt-3" href="{{ url_for('books.new_book') }}" role="button">Dodaj książkę</a>
+                <a class="btn btn-success mt-3 ml-2" href="{{ url_for('books.new_author') }}" role="button">Dodaj autora</a>
+                <a class="btn btn-success mt-3 ml-2" href="{{ url_for('books.add_copies') }}" role="button">Dodaj egzemplarze</a>
                 <a class="btn btn-secondary mt-3 ml-2" href="{{ url_for('users.users_list') }}" role="button">Lista czytelników</a>
             </div>
         </div>
@@ -32,6 +37,8 @@
     </div>
 
     <!-- Information about books (reservation, penalties etc.) -->
+
+    {% if current_user.typ_konta_id != ADMIN_ID %}
     <div class="content-section">
         <div class="border-bottom">
             <h4>Książki zarezerwowane</h4>
@@ -97,5 +104,40 @@
         </div>
         {% endif %}
     </div>
+
+ <!-- list of penalties -->
+    <div class="content-section">
+        <div class="border-bottom">
+            <h4>Kary nieopłacone</h4>
+        </div>
+        {% if penalties %}
+        <table class="table table-borderless table-sm table-hover">
+        <thead>
+        <tr>
+          <th scope="col" class="border-bottom">ID egzemplarza</th>
+          <th scope="col" class="border-bottom">Tytuł</th>
+          <th scope="col" class="border-bottom">Typ kary</th>
+          <th scope="col" class="border-bottom">Opłata</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        {% for pen in penalties %}
+        <tr>
+            <td>{{ pen['copyid'] }}</td>
+            <td>{{ pen['title'] }}</td>
+            <td>{{ pen['pen_type'] }}</td>
+            <td>{{ pen['amount']|string }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+        {% else %}
+        <div class="m-2">
+            Brak
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
 
 {% endblock content %}

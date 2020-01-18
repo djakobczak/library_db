@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <div class="content-section">
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Dodaj karę</legend>
+                    <div class="form-group">
+                        {{ form.copyid.label(class="form-control-label") }}
+                        {% if form.copyid.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.copyid.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.copyid(class="form-control") }}
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.penalty_type.label(class="form-control-label") }}
+                        {% if form.penalty_type.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.penalty_type.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.penalty_type(class="form-control") }}
+                        {% endif %}
+                    </div>
+
+            </fieldset>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-danger") }}
+            </div>
+        </form>
+    </div>
+{% endblock content %}
+

@@ -119,8 +119,10 @@ class Egzemplarze(db.Model):
 
     id = Column(Integer, primary_key=True, server_default=text("nextval('egzemplarze_id_seq'::regclass)"))
     ksiazka_id = Column(ForeignKey('ksiazki.id'))
+    biblioteka_id = Column(ForeignKey('biblioteki.id'))
 
     ksiazka = relationship('Ksiazki')
+    biblioteka = relationship('Biblioteki')
 
 class Biblioteki(db.Model):
     __tablename__ = 'biblioteki'

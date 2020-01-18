@@ -1,9 +1,11 @@
-
 # reservation for 3 days?
+from datetime import datetime
+
 from flask_login import current_user
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.sql import text
 
-from librarydb.models import Ksiazki, Rezerwacje
+from librarydb.models import Ksiazki, Rezerwacje, TypKary, Kary
 
 
 def reserved_books_by_user(db, user_id):
@@ -33,10 +35,7 @@ def reserved_books_by_user_alchemy(db, uid):
 
     rbooks_list = []
     for res in rbooks:
-        d = {}
-        d['ksiazka_id'] = res[0]
-        d['tytul'] = res[1]
-        d['data_rezerwacji'] = res[2]
+        d = {'ksiazka_id': res[0], 'tytul': res[1], 'data_rezerwacji': res[2]}
         rbooks_list.append(d)
 
     return rbooks_list
@@ -50,7 +49,7 @@ def user_borrowed_books(db, uid):
     :return:        (list)      : list of books (title, borrow_date)
     """
 
-    query = f"""
+    query = text("""
     SELECT 
         w.uzytkownik_id, k.tytul, w.data_wypozyczenia
     FROM
@@ -59,11 +58,31 @@ def user_borrowed_books(db, uid):
         ksiazki k ON k.id = e.ksiazka_id
     WHERE 
         w.data_oddania IS NULL AND
-        w.uzytkownik_id={uid}
+        w.uzytkownik_id=:uid
     ;   
-    """
-    result = db.engine.execute(query).fetchall()
+    """)
+    result = db.engine.execute(query, uid=uid).fetchall()
     return result
+
+
+def get_penalties(db, uid):
+    query = text("""
+    SELECT 
+        egzemplarz_id, tytul, typ_kary, wysokosc, ksiazka_id 
+    FROM    
+        v_kary_nieoplacone
+    WHERE 
+        uzytkownik_id=:uid
+    """)
+
+    penalties = db.engine.execute(query, uid=uid).fetchall()
+
+    penalties_list = []
+    for res in penalties:
+        d = {'copyid': res[0], 'title': res[1], 'pen_type': res[2], 'amount': res[3], 'pid': res[4]}
+        penalties_list.append(d)
+
+    return penalties_list
 
 
 def update_user_information(db, user, form):
@@ -82,6 +101,46 @@ def update_user_information(db, user, form):
         return False
 
 
+# sqlalchemy engine execute transaction !TODO
+def cancel_penalty_db(db, uid, pid):
+    """
+
+    :param db:
+    :param uid:     (ind)   : user id
+    :param pid:     (int)   : penalty id
+    :return:
+    """
+    query = text("""
+    DELETE FROM kary WHERE id=:pid AND uzytkownik_id=:uid
+    """)
+
+    db.engine.execute(query, uid=uid, pid=pid)
 
 
+def pay_penalty_db(db, pid):
+    """
+    Marks that penalty of id equals pid was paid.
+    :param db:      (object)
+    :param pid:     (int)   : penalty id
+    :return:
+    """
+    query = text("""
+        INSERT INTO platnosci (id_kary, data_platnosci) VALUES (:pid, :timestamp);
+    """)
+    db.engine.execute(query, pid=pid, timestamp=datetime.now())
 
+
+def get_payments(db, uid):
+    query = text(
+        """
+        SELECT * FROM v_platnosci WHERE id=:uid
+        """
+    )
+    payments = db.engine.execute(query, uid=uid).fetchall()
+
+    payments_list = []
+    for pay in payments:
+        d = {'pid': pay[0], 'pay_date': pay[1], 'title': pay[4], 'pen_type': pay[5], 'eid': pay[6], 'amount': pay[7]}
+        payments_list.append(d)
+
+    return payments_list
