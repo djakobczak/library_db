@@ -6,9 +6,9 @@ from sqlalchemy import text
 from datetime import datetime
 
 from librarydb import app, db
-from librarydb.books.forms import SearchForm, NewBookForm, NewAuthorForm, AddCopiesForm
+from librarydb.books.forms import SearchForm, NewBookForm, NewAuthorForm, AddCopiesForm, AddOpinionForm
 from librarydb.books.utils import available_books, insert_author, BooksDb
-from librarydb.models import Ksiazki, Egzemplarze, Rezerwacje, Wypozyczenia
+from librarydb.models import Ksiazki, Egzemplarze, Rezerwacje, Wypozyczenia, Opinie
 from librarydb.settings import *
 
 books = Blueprint('books', __name__)
@@ -16,23 +16,29 @@ books = Blueprint('books', __name__)
 
 # changed books to book
 @books.route("/book", methods=['GET', 'POST'])
-def books_list():
+@books.route("/book/<int:uid>", methods=['GET', 'POST'])
+def books_list(uid=None):
     page = request.args.get('page', 1, type=int)
     # cbooks = Book2.query.order_by(Book2.title.asc()).paginate(page=page, per_page=5)
     cbooks = Ksiazki.query.order_by(Ksiazki.tytul.asc()).paginate(page=page, per_page=5)
 
     form = SearchForm()
     if form.validate_on_submit():
-        return redirect(url_for('books.search_results', search_value=form.search_value.data))
+        if uid:
+            return redirect(url_for('books.search_results', search_value=form.search_value.data, uid=uid))
+        else:
+            return redirect(url_for('books.search_results', search_value=form.search_value.data))
 
-    return render_template('books.html', books=cbooks, title="książki", form=form)
+    return render_template('books.html', books=cbooks, title="książki", form=form, uid=uid)
 
 
 @books.route("/results/<search_value>", methods=['GET', 'POST'])
-def search_results(search_value):
+@books.route("/results/<search_value>/<int:uid>", methods=['GET', 'POST'])
+def search_results(search_value, uid=None):
     """
     Route is needed, because of pagination. If we used only books route then after going to
     e.g. page 2 our search results would be deleted.
+    :param uid:
     :param search_value:
     :return:
     """
@@ -47,15 +53,19 @@ def search_results(search_value):
         flash('Brak wyników wyszukiwania', 'danger')
 
     if form.validate_on_submit():
-        return redirect(url_for('books.search_results', search_value=form.search_value.data))
+        if uid:
+            return redirect(url_for('books.search_results', search_value=form.search_value.data, uid=uid))
+        else:
+            return redirect(url_for('books.search_results', search_value=form.search_value.data))
 
     return render_template('search_results.html', books=search_result, title="wyniki wyszukiwania",
-                           form=form, search_value=search_value)
+                           form=form, search_value=search_value, uid=uid)
 
 
-@books.route("/book/<int:book_id>")
+@books.route("/book-info/<int:book_id>")
+@books.route("/book-info/<int:book_id>/<int:uid>")
 @login_required
-def book_info(book_id):
+def book_info(book_id, uid=None):
     # book = create_book(get_book(book_id))
     book = Ksiazki.query.get(int(book_id))
     if not book:
@@ -63,10 +73,63 @@ def book_info(book_id):
 
     abooks = available_books(db, book_id)
     copies = BooksDb.get_copies(book_id)
-    print(copies)
+    categories = BooksDb.get_categories(book_id)
+    opinions = Opinie.query.filter(Opinie.ksiazka_id == book_id).all()
 
     return render_template('book_info.html', book=book, book_count=abooks, copies=copies,
+                           categories=categories, uid=uid, opinions=opinions,
                            ADMIN_ID=ADMIN_ID, USER_ID=USER_ID)
+
+
+@books.route("/book-info/<int:book_id>/opinion", methods=['GET', 'POST'])
+@login_required
+def add_opinion(book_id):
+    form = AddOpinionForm()
+    if form.validate_on_submit():
+        opinion = Opinie(ksiazka_id=book_id, uzytkownik_id=current_user.id,
+                         opinia=form.content.data, data_dodania=datetime.now())
+        db.session.add(opinion)
+        try:
+            db.session.commit()
+            flash('Twoja opinia została dodana', 'success')
+            return redirect(url_for('books.book_info', book_id=book_id))
+        except IntegrityError:
+            db.session.rollback()
+            flash('Wystąpił błąd, spórbuj ponownie później', 'danger')
+            return redirect(url_for('books.book_info', book_id=book_id))
+
+    return render_template('add_opinion.html', form=form, legend='Dodaj swoją opinię')
+
+
+@books.route("/<int:book_id>/opinion/<int:opinion_id>/update", methods=['GET', 'POST'])
+@login_required
+def update_opinion(opinion_id, book_id):
+    opinion = Opinie.query.get_or_404(opinion_id)
+    if opinion.uzytkownik != current_user and current_user.typ_konta_id != ADMIN_ID:
+        abort(403)
+
+    form = AddOpinionForm()
+    if form.validate_on_submit():
+        opinion.opinia = form.content.data
+        opinion.data_dodania = datetime.now()
+        db.session.commit()
+        flash('Opinia została zaktualizowana', 'success')
+        return redirect(url_for('books.book_info', book_id=book_id))
+    elif request.method == 'GET':
+        form.content.data = opinion.opinia
+
+    return render_template('add_opinion.html', form=form, legend='Zaktualizuj swoją opinię')
+
+@books.route("/<int:book_id>/opinion/<int:opinion_id>/delete", methods=['GET', 'POST'])
+@login_required
+def delete_opinion(opinion_id, book_id):
+    opinion = Opinie.query.get_or_404(opinion_id)
+    if opinion.uzytkownik != current_user and current_user.typ_konta_id != ADMIN_ID:
+        abort(403)
+    db.session.delete(opinion)
+    db.session.commit()
+    flash('Opinia została usunięta', 'success')
+    return redirect(url_for('books.book_info', book_id=book_id))
 
 
 @books.route("/book/<int:book_id>/update", methods=['GET', 'POST'])
@@ -83,9 +146,9 @@ def update_book(book_id):
         #                      category=form.category.data,
         #                      count=form.count.data, description=form.description.data)
         ans = BooksDb.update_book(book=book, title=form.title.data, aid=form.aid.data,
-                                          pid=form.pid.data, premiere_date=form.premiere_date.data,
-                                          publ_year=form.publication_date.data, ean=form.ean.data,
-                                          lang_id=form.lang_id.data)
+                                  pid=form.pid.data, premiere_date=form.premiere_date.data,
+                                  publ_year=form.publication_date.data, ean=form.ean.data,
+                                  lang_id=form.lang_id.data)
         if ans:
             flash('Książka została zaktualizowana', 'success')
             return redirect(url_for('books.book_info', book_id=book.id))
@@ -138,9 +201,9 @@ def new_book():
         # ans = insert_book(title=form.title.data, author=form.author.data, category=form.category.data,
         #                   count=form.count.data, description=form.description.data)
         ans = BooksDb.insert_book(title=form.title.data, aid=form.aid.data,
-                                          pid=form.pid.data, premiere_date=form.premiere_date.data,
-                                          publ_year=form.publication_date.data, ean=form.ean.data,
-                                          lang_id=form.lang_id.data)
+                                  pid=form.pid.data, premiere_date=form.premiere_date.data,
+                                  publ_year=form.publication_date.data, ean=form.ean.data,
+                                  lang_id=form.lang_id.data)
         if ans:
             flash('Książka została dodana do bazy', 'success')
             app.logger.info('New book with title %s added sucessfully', form.title.data)  # should be id
@@ -170,19 +233,27 @@ def new_author():
 @login_required
 def reserve(book_id):
     # TODO check whether user can borrow a book, - transaction
+    is_reserved = Rezerwacje.query. \
+        filter(Rezerwacje.uzytkownik_id == current_user.id, Rezerwacje.ksiazka_id == book_id).first()
+    if is_reserved:
+        flash('Nie możesz zarezerwować dwa razy tej samej książki', 'danger')
+        return redirect(url_for('books.book_info', book_id=book_id))
+
     reservation = Rezerwacje(uzytkownik_id=current_user.id, data_rezerwacji=datetime.now(), ksiazka_id=book_id)
     abooks = available_books(db, book_id)
-    db.session.add(reservation)     #
+    db.session.add(reservation)  #
     if abooks < 1:
         db.session.rollback()
         flash('Rezerwacja się nie powiodła, egzemplarze się skończyły', 'danger')
-        app.logger.error('Reservation is not possible, no of copies=%s ,book_id=%s, user_id=%s', abooks, book_id, current_user.id)
+        app.logger.error('Reservation is not possible, no of copies=%s ,book_id=%s, user_id=%s', abooks, book_id,
+                         current_user.id)
         return redirect(url_for('books.book_info', book_id=book_id))
 
     try:
         db.session.commit()
         flash('Rezerwacja się powiodła', 'success')
         return redirect(url_for('books.book_info', book_id=book_id))
+
     except IntegrityError as e:
         app.logger.error('Reservation aborted, book_id=%s, user_id=%s', book_id, current_user.id)
         flash('Rezerwacja się nie powiodła', 'danger')
@@ -191,12 +262,15 @@ def reserve(book_id):
 
 @books.route("/book/reserve/<int:bcid>/remove/<int:uid>", methods=['POST'])
 @login_required
-def remove_reservation(bcid, uid):     # bcid = book copy id
+def remove_reservation(bcid, uid):  # bcid = book copy id
     res = Rezerwacje.query.filter_by(ksiazka_id=bcid, uzytkownik_id=uid).first()
     db.session.delete(res)
     db.session.commit()
     flash('Odwołano rezerwacje', 'danger')
-    return redirect(url_for('users.user_info', uid=uid))
+    if current_user.id == uid:
+        return redirect(url_for('users.account'))
+    else:
+        return redirect(url_for('users.user_info', uid=uid))
 
 
 @books.route("/account/add-copies", methods=['GET', 'POST'])
@@ -215,5 +289,3 @@ def add_copies():
         else:
             flash(ROLLBACK_MSG, 'danger')
     return render_template('add_copies.html', form=form, legend='Dodaj egzemplarze do bazy')
-
-

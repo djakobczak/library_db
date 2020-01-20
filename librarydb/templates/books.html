@@ -22,10 +22,17 @@
     <ul class="list-group" id="myList">
         {% for book in books.items %}
         <div class="">
+            {% if uid %}
+            <a href="{{ url_for('books.book_info', book_id=book.id, uid=uid) }}" class="list-group-item list-group-item-action">
+                <h5>{{ book.tytul }} </h5>
+                <div class="author-box-intro small text-muted">{{ book.autor.imie + ' ' + book.autor.nazwisko }}</div>
+            </a>
+            {% else %}
             <a href="{{ url_for('books.book_info', book_id=book.id) }}" class="list-group-item list-group-item-action">
                 <h5>{{ book.tytul }} </h5>
                 <div class="author-box-intro small text-muted">{{ book.autor.imie + ' ' + book.autor.nazwisko }}</div>
             </a>
+            {% endif %}
         </div>
         {% endfor %}
     </ul>

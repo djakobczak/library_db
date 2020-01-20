@@ -32,6 +32,8 @@
         <div class="mt-2 border-top">
             <div class="ml-auto mr-2">
                 <a class="btn btn-success mt-3" href="{{ url_for('users.update_account', uid=user.id) }}" role="button">Zmień dane</a>
+                <a class="btn btn-success mt-3 ml-2" href="{{ url_for('books.books_list', uid=user.id) }}" role="button">Wypożycz</a>
+<!--                <button type="button" class="btn btn-success mt-3 ml-2" data-toggle="modal" data-target="#borrowModal">Wypożycz</button>-->
                 <a class="btn btn-danger mt-3 ml-2" href="{{ url_for('users.penalize_user', uid=user.id) }}" role="button">Dodaj karę</a>
             </div>
         </div>
@@ -48,7 +50,7 @@
         <tr>
           <th scope="col" class="border-bottom">Nazwa książki</th>
           <th scope="col" class="border-bottom">Data rezerwacji</th>
-          <th scope="col" class="border-bottom">Odwołaj</th>
+          <th scope="col" class="border-bottom text-right pr-5">Akcja</th>
         </tr>
         </thead>
 
@@ -58,7 +60,7 @@
             <td>{{ res['tytul'] }}</td>
             <td>{{ res['data_rezerwacji'].strftime("%H:%M %Y-%m-%d") }}</td>
 
-            <td>
+            <td class="text-right pr-4">
                 <form action="{{ url_for('books.remove_reservation', bcid=res['ksiazka_id'], uid=user.id) }}" method="POST">
                     <input id="removeBtn" class="btn btn-danger btn-sm"  type="submit" value="Odwołaj">
                 </form>
@@ -84,17 +86,23 @@
         <thead>
         <tr>
           <th scope="col" class="border-bottom text-left">Nazwa książki</th>
-          <th scope="col" class="border-bottom text-right pr-5">Data wypożyczenia</th>
+          <th scope="col" class="border-bottom">Data wypożyczenia</th>
+          <th scope="col" class="border-bottom text-right pr-5">Akcja</th>
         </tr>
         </thead>
 
         <tbody>
-        {% for book in bbooks %}
-        <tr>
-            <td>{{ book[1] }}</td>
-            <td class="text-right pr-5">{{ book[2].strftime("%H:%M %Y-%m-%d") }}</td>
-        </tr>
-        {% endfor %}
+            {% for book in bbooks %}
+            <tr>
+                <td>{{ book[1] }}</td>
+                <td>{{ book[2].strftime("%H:%M %Y-%m-%d") }}</td>
+                <td class="text-right pr-4">
+                     <form action="{{ url_for('users.return_book', uid=user.id, lend_id=book[3]) }}" method="POST">
+                        <input id="returnBook" class="btn btn-outline-success btn-sm mr-2"  type="submit" value="Oddaj">
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
         </tbody>
         </table>
         {% else %}
@@ -182,4 +190,43 @@
             </div>
             {% endif %}
         </div>
+
+<!-- ********************************************************************************* -->
+<!-- Modal -->
+<!--<div class="modal fade" id="borrowModal" tabindex="-1" role="dialog" aria-labelledby="borrowModalLabel" aria-hidden="true">-->
+<!--  <div class="modal-dialog" role="document">-->
+<!--    <div class="modal-content">-->
+<!--      <div class="modal-header">-->
+<!--        <h5 class="modal-title" id="borrowModalLabel">Wypożycz książkę</h5>-->
+<!--        <button type="button" class="close" data-dismiss="modal" aria-label="Zamknij">-->
+<!--          <span aria-hidden="true">&times;</span>-->
+<!--        </button>-->
+<!--      </div>-->
+<!--        <form action="{{ url_for('books.search_results', search_value=search_form.search_value, uid=user.id) }}" method="GET">-->
+<!--        <div class="modal-body">-->
+
+<!--          {{ search_form.hidden_tag() }}-->
+<!--          <div class="form-group">-->
+<!--            {{ search_form.search_value.label(class="form-control-label") }}-->
+<!--            {% if search_form.search_value.errors %}-->
+<!--                {{ search_form.search_value(class="form-control form-control-lg is-invalid") }}-->
+<!--                <div class="invalid-feedback">-->
+<!--                    {% for error in search_form.search_value.errors %}-->
+<!--                        <span>{{ error }}</span>-->
+<!--                    {% endfor %}-->
+<!--                </div>-->
+<!--            {% else %}-->
+<!--                {{ search_form.search_value(class="form-control form-control-lg") }}-->
+<!--            {% endif %}-->
+<!--          </div>-->
+
+<!--        </div>-->
+<!--          <div class="modal-footer">-->
+<!--            <button type="button" class="btn btn-secondary" data-dismiss="modal">Nie</button>-->
+<!--            {{ search_form.submit(class="btn btn-outline-success") }}-->
+<!--          </div>-->
+<!--        </form>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</div>-->
 {% endblock content %}

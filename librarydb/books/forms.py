@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, IntegerField, DateField, SubmitField, SelectField
+from wtforms import StringField, IntegerField, DateField, SubmitField, SelectField, TextAreaField
 from wtforms.validators import DataRequired, NumberRange, Optional
 
 from librarydb.books.utils import get_penalties_tuples, \
@@ -22,7 +22,7 @@ class NewBookForm(FlaskForm):
     submit = SubmitField('Potwierdź')
 
 class SearchForm(FlaskForm):
-    search_value = StringField(validators=[DataRequired()], render_kw={"placeholder": "Jakiej książki szukasz?"})
+    search_value = StringField('', validators=[DataRequired()], render_kw={"placeholder": "Jakiej książki szukasz?"})
     submit = SubmitField('Szukaj')
 
 
@@ -42,3 +42,7 @@ class AddCopiesForm(FlaskForm):
     library_id = SelectField('Biblioteka', choices=LIBRARIES_TYPES)
     count = IntegerField('Ilość', validators=[DataRequired(), NumberRange(min=1)])
     submit = SubmitField('Dodaj')
+
+class AddOpinionForm(FlaskForm):
+    content = TextAreaField('Opinia', validators=[DataRequired()])
+    submit = SubmitField('Dodaj opinie')

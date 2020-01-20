@@ -49,7 +49,7 @@
         <tr>
           <th scope="col" class="border-bottom">Nazwa książki</th>
           <th scope="col" class="border-bottom">Data rezerwacji</th>
-          <th scope="col" class="border-bottom">Odwołaj</th>
+          <th scope="col" class="border-bottom">Akcja</th>
         </tr>
         </thead>
 
@@ -85,7 +85,7 @@
         <thead>
         <tr>
           <th scope="col" class="border-bottom">Nazwa książki</th>
-          <th scope="col" class="border-bottom">Data wypożyczenia</th>
+          <th scope="col" class="border-bottom text-right pr-5" >Data wypożyczenia</th>
         </tr>
         </thead>
 
@@ -93,7 +93,7 @@
         {% for book in bbooks %}
         <tr>
             <td>{{ book[1] }}</td>
-            <td>{{ book[2].strftime("%H:%M %Y-%m-%d") }}</td>
+            <td class="text-right pr-5">{{ book[2].strftime("%H:%M %Y-%m-%d") }}</td>
         </tr>
         {% endfor %}
         </tbody>

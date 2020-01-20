@@ -53,7 +53,7 @@ CREATE TABLE uzytkownicy
   imie character varying(20) NOT NULL,
   nazwisko character varying(20) NOT NULL,
   pesel varchar(11) NOT NULL UNIQUE CHECK(LENGTH(pesel)=11),
-  email character varying(30) NOT NULL,
+  email character varying(30) NOT NULL UNIQUE,
   adres character varying(40),
   nazwa_uzytkownika character varying(15) NOT NULL,
   haslo character varying(60) NOT NULL,
@@ -93,7 +93,8 @@ CREATE TABLE opinie
   id serial primary key,
   ksiazka_id integer REFERENCES ksiazki(id),
   uzytkownik_id integer REFERENCES uzytkownicy(id),
-  opinia text NOT NULL
+  opinia text NOT NULL,
+  data_dodania timestamp without time zone NOT NULL
 );
 
 CREATE TABLE platnosci

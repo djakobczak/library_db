@@ -116,11 +116,13 @@ CREATE OR REPLACE VIEW v_kary_oplacone as
   ORDER BY u.nazwa_uzytkownika;
 
 CREATE OR REPLACE VIEW v_kary_nieoplacone as
- SELECT k.id,
+ SELECT k.id as ksiazka_id,
     u.nazwa_uzytkownika,
+		u.id as uzytkownik_id,
     ks.tytul,
     tk.typ_kary,
-    e.id AS egzemplarz_id
+    e.id AS egzemplarz_id,
+		k.wysokosc
    FROM kary k
      JOIN uzytkownicy u ON u.id = k.uzytkownik_id
      JOIN typ_kary tk ON tk.id = k.typ_kary_id
@@ -128,3 +130,18 @@ CREATE OR REPLACE VIEW v_kary_nieoplacone as
      JOIN ksiazki ks ON ks.id = e.ksiazka_id
      LEFT JOIN platnosci p ON p.id_kary = k.id where p.id_kary is null
   ORDER BY u.nazwa_uzytkownika;
+
+	drop view v_egzemplarze_wypozyczenia;
+CREATE OR REPLACE VIEW v_egzemplarze_wypozyczenia as
+	SELECT e.id as egzemplarz_id, EXISTS (select 1 from wypozyczenia w where egzemplarz_id = e.id) as czy_wypozyczona
+	FROM egzemplarze e
+	left JOIN wypozyczenia w ON w.egzemplarz_id = e.id
+	ORDER BY e.id;
+
+drop view v_egzemplarze_rezerwacje_wypozyczenia;
+CREATE OR REPLACE VIEW v_egzemplarze_rezerwacje_wypozyczenia as
+	SELECT k.id as ksiazka_id, e.id as egzemplarz_id, EXISTS (select 1 from wypozyczenia w where egzemplarz_id = e.id and data_oddania is null) as czy_wypozyczona,
+		EXISTS (select 1 from rezerwacje where ksiazka_id = k.id) as czy_rezerwacja_na_ksiazke
+	FROM egzemplarze e
+	INNER JOIN ksiazki k ON k.id = e.ksiazka_id
+	ORDER BY e.id;

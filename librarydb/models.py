@@ -147,6 +147,7 @@ class Opinie(db.Model):
     ksiazka_id = Column(ForeignKey('ksiazki.id'))
     uzytkownik_id = Column(ForeignKey('uzytkownicy.id'))
     opinia = Column(Text, nullable=False)
+    data_dodania = Column(DateTime, nullable=False)
 
     ksiazka = relationship('Ksiazki')
     uzytkownik = relationship('Uzytkownicy')
@@ -162,13 +163,6 @@ class Rezerwacje(db.Model):
 
     ksiazka = relationship('Ksiazki')
     uzytkownik = relationship('Uzytkownicy')
-
-
-# t_biblioteka_egzemplarz = Table(
-#     'biblioteka_egzemplarz', metadata,
-#     Column('biblioteka_id', ForeignKey('biblioteki.id'), primary_key=True, nullable=False),
-#     Column('egzemplarz_id', ForeignKey('egzemplarze.id'), primary_key=True, nullable=False)
-# )
 
 
 class Kary(db.Model):
@@ -216,6 +210,8 @@ class Ksiazka_kategoria(db.Model):
 
     kategoria_id = Column(Integer, ForeignKey('kategoria.id'))
     ksiazka_id = Column(ForeignKey('ksiazki.id'))
+
+    kategoria = relationship('Kategoria')
 
 
 class Biblioteka_egzemplarz(db.Model):

@@ -1,9 +1,13 @@
+from datetime import datetime
+
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 
 from librarydb import db
-from librarydb.models import Ksiazki, Rezerwacje, Wypozyczenia, Egzemplarze, Autor, Biblioteki
+from librarydb.models import Ksiazki, Rezerwacje, Ksiazka_kategoria, Wypozyczenia, Egzemplarze, Autor, Biblioteki, \
+    Kategoria
 from librarydb.models import TypKary, Kary
+
 
 # Model.query is a shortcut to db.sesssion.query(model) it's not callable.
 # If you're not querying a model, continue to use db.session.query(...)
@@ -42,6 +46,7 @@ def available_books(db, book_id):
     result = db.engine.execute(query).scalar()
     return result
 
+
 def get_penalties_types():
     """
 
@@ -49,6 +54,7 @@ def get_penalties_types():
     """
     penalties = TypKary.query.all()
     return penalties
+
 
 def get_libraries_types():
     """
@@ -70,6 +76,7 @@ def get_penalties_tuples():
     for pen in penatlies:
         out_pen.append((str(pen.id), (pen.typ_kary + " - " + str(pen.wysokosc))))
     return out_pen
+
 
 def get_libraries_tuples():
     libraries = get_libraries_types()
@@ -168,12 +175,58 @@ class BooksDb:
         """
 
         query = text(
-            "SELECT * FROM v_egzemplarze WHERE ksiazka_id=:bid"
+            "SELECT * FROM v_egzemplarze_rezerwacje_wypozyczenia WHERE ksiazka_id=:bid"
         )
-        copies = db.engine.execute(query, bid=bid).fetchall()   # copies[i].atrr
+        copies = db.engine.execute(query, bid=bid).fetchall()  # copies[i].atrr
         # copies = convert_to_dict_structure(copies, 'eid', 'title', 'name', 'surname', 'library_name', 'bid')
 
         return copies
+
+    @staticmethod
+    def get_categories(bid):
+        """
+        Returns categories assigned to the book.
+        :param bid:     (int)   : book id
+        :return:        (str)   : categories assigned to the book
+        """
+        categories = db.session.query(Kategoria.kategoria)\
+            .join(Ksiazka_kategoria, (Ksiazka_kategoria.kategoria_id == Kategoria.id)) \
+            .filter(Ksiazka_kategoria.ksiazka_id == bid).all()
+
+        categories_str = ""
+        for k, cat in enumerate(categories):
+            if k == (len(categories) - 1):
+                categories_str += cat[0]
+            else:
+                categories_str += cat[0] + ", "
+        return categories_str
+
+    @staticmethod
+    def borrow_book(cid, bid, uid):
+        """
+        Check whether user can borrow particular book or not. If user had the reservation on that book, remove it.
+        :param uid:     (int)   : user id
+        :param cid:     (int)   : copy id
+        :return:
+        """
+        reserv = Rezerwacje.query.filter(Rezerwacje.uzytkownik_id==uid, Rezerwacje.ksiazka_id==bid).first()
+
+        if reserv:
+            bbook = Wypozyczenia(uzytkownik_id=uid, data_wypozyczenia=datetime.now(), egzemplarz_id=cid)
+            db.session.add(bbook)
+            db.session.delete(reserv)
+
+            return commit_changes()
+
+        else:
+            if available_books(db, book_id=bid)>0:
+                bbook = Wypozyczenia(uzytkownik_id=uid, data_wypozyczenia=datetime.now(), egzemplarz_id=cid)
+                db.session.add(bbook)
+
+                return commit_changes()
+            else:
+                return False
+
 
 def commit_changes():
     try:
@@ -211,3 +264,6 @@ def convert_to_dict_structure(tlist, *names):
 
     return out_list
 
+
+class NotAvailableException(Exception):
+    pass

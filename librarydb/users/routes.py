@@ -2,13 +2,13 @@ from flask import Blueprint, request, redirect, url_for, render_template, flash,
 from flask_login import login_required, current_user, login_user, logout_user
 
 from librarydb import app, db, bcrypt
-from librarydb.books.forms import PenaltyForm
-from librarydb.books.utils import get_penalties_tuples, add_penalty
+from librarydb.books.forms import PenaltyForm, SearchForm
+from librarydb.books.utils import add_penalty, BooksDb
 from librarydb.models import Uzytkownicy, TypKonta, Rezerwacje, Ksiazki
 from librarydb.settings import *
 from librarydb.users.forms import LoginForm, RegistrationForm, SearchUserForm, UpdateAccountForm
 from librarydb.users.utils import reserved_books_by_user_alchemy, user_borrowed_books, update_user_information, \
-    get_penalties, cancel_penalty_db, pay_penalty_db, get_payments
+    get_penalties, cancel_penalty_db, pay_penalty_db, get_payments, return_book_db
 
 users = Blueprint('users', __name__)
 
@@ -22,6 +22,7 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        # noinspection PyArgumentList
         user = Uzytkownicy(imie=form.name.data, nazwisko=form.surname.data,
                            pesel=form.pin.data, email=form.email.data,
                            adres=form.address.data, nazwa_uzytkownika=form.username.data,
@@ -70,7 +71,7 @@ def logout():
 def account():
     # rbooks = reserved_books_by_user(db, current_user.id)  # !TODO try to change to dict by using ORM
     rbooks = reserved_books_by_user_alchemy(db, current_user.id)
-    bbooks = user_borrowed_books(db, current_user.id)
+    bbooks = user_borrowed_books(current_user.id)
     penalties = get_penalties(db, current_user.id)
 
     return render_template('account.html', title='Twoje konto', rbooks=rbooks, bbooks=bbooks,
@@ -98,19 +99,26 @@ def users_list():
 def user_info(uid):  # all users should have access to this route?
     if current_user.typ_konta_id != ADMIN_ID:
         abort(403)
+
+    if current_user.typ_konta_id != ADMIN_ID:
+        abort(403)
     user = Uzytkownicy.query.get_or_404(int(uid))
 
+    search_form = SearchForm()
     rbooks = reserved_books_by_user_alchemy(db, user.id)
-    bbooks = user_borrowed_books(db, user.id)
+    bbooks = user_borrowed_books(user.id)
     penalties = get_penalties(db, user.id)
     payments = get_payments(db, user.id)
     return render_template('user_info.html', user=user, rbooks=rbooks, bbooks=bbooks,
-                           penalties=penalties, payments=payments)
+                           penalties=penalties, payments=payments, search_form=search_form)
 
 
 @users.route("/account/users/<int:uid>/update", methods=['GET', 'POST'])
 @login_required
 def update_account(uid):  # all users should have access to this route?
+    if current_user.typ_konta_id != ADMIN_ID:
+        abort(403)
+
     user = Uzytkownicy.query.get_or_404(uid)
     if current_user.typ_konta_id != ADMIN_ID:
         abort(403)
@@ -144,14 +152,9 @@ def penalize_user(uid):
     form = PenaltyForm()
     if form.validate_on_submit():
         if add_penalty(db, uid=uid, copyid=form.copyid.data, pid=form.penalty_type.data):
-            flash(f'Użytkownik o id={uid} dostał karę', 'success')
+            flash(f'Użytkownik o id {uid} dostał karę', 'success')
 
-            user = Uzytkownicy.query.get_or_404(int(uid))
-
-            rbooks = reserved_books_by_user_alchemy(db, user.id)
-            bbooks = user_borrowed_books(db, user.id)
-            penalties = get_penalties(db, user.id)
-            return render_template('user_info.html',  user=user, rbooks=rbooks, bbooks=bbooks, penalties=penalties)
+            return redirect(url_for('users.user_info', uid=uid))
         else:
             flash('Dodanie kary się nie powiodło, sprawdź czy podane ID egzemplarza istnieje w bazie', 'danger')
 
@@ -161,29 +164,55 @@ def penalize_user(uid):
 @users.route("/account/users/<int:uid>/penalty/<int:pid>/remove", methods=['POST'])
 @login_required
 def cancel_penalty(uid, pid):
+    if current_user.typ_konta_id != ADMIN_ID:
+        abort(403)
+
     cancel_penalty_db(db, uid=uid, pid=pid)
     flash('Kara została wycofana', 'success')
-    user = Uzytkownicy.query.get_or_404(int(uid))
 
-    rbooks = reserved_books_by_user_alchemy(db, user.id)
-    bbooks = user_borrowed_books(db, user.id)
-    penalties = get_penalties(db, user.id)
-    return render_template('user_info.html', user=user, rbooks=rbooks, bbooks=bbooks, penalties=penalties)
+    return redirect(url_for('users.user_info', uid=uid))
 
 
 @users.route("/account/users/<int:uid>/penalty/<int:pid>/pay", methods=['POST'])
 @login_required
 def pay_penalty(uid, pid):
+    if current_user.typ_konta_id != ADMIN_ID:
+        abort(403)
+
     pay_penalty_db(db, pid)
     app.logger.info(f'Penalty was paid, uid={uid}, penalty_id={pid}')
     flash('Oplacono kare', 'success')
-    return redirect_to_user_info(uid)
+    return redirect(url_for('users.user_info', uid=uid))
 
 
-def redirect_to_user_info(uid):
-    user = Uzytkownicy.query.get_or_404(int(uid))
+@users.route("/account/users/<int:uid>/return/<int:lend_id>", methods=['POST'])
+@login_required
+def return_book(uid, lend_id):
+    if current_user.typ_konta_id != ADMIN_ID:
+        abort(403)
 
-    rbooks = reserved_books_by_user_alchemy(db, user.id)
-    bbooks = user_borrowed_books(db, user.id)
-    penalties = get_penalties(db, user.id)
-    return render_template('user_info.html', user=user, rbooks=rbooks, bbooks=bbooks, penalties=penalties)
+    if return_book_db(lend_id):
+        flash('Ksiązkę oddano', 'success')
+    else:
+        flash('Błąd podczas oddawnia ksążki', 'danger')
+    return redirect(url_for('users.user_info', uid=uid))
+
+
+@users.route("/account/users/<int:uid>/borrow/<int:bid>/<int:cid>", methods=['POST'])
+@login_required
+def borrow_book(uid, cid, bid):
+    """
+
+    :param bid:
+    :param uid:
+    :param cid:     (int)   : copy id
+    :return:
+    """
+    if current_user.typ_konta_id != ADMIN_ID:
+        abort(403)
+    if BooksDb.borrow_book(cid=cid, bid=bid, uid=uid):
+        flash('Książka została wypożyczona', 'success')
+    else:
+        flash('Błąd podczas wypożyczenia, pradopodobnie książka została zarezerwowana', 'danger')
+
+    return redirect(url_for('users.user_info', uid=uid))

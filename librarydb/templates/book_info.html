@@ -1,6 +1,12 @@
 {% extends "layout.html" %}
 {% block content %}
+{% if current_user.typ_konta_id == ADMIN_ID %}
+<div class="row">
+<div class="content-section col-md-8">
+{% else %}
 <div class="content-section">
+{% endif %}
+
     <div class="border-bottom">
         <h3>Informacje o książce</h3>
     </div>
@@ -32,6 +38,15 @@
             <dd class="col-md-9">-</dd>
         {% endif %}
 
+        <dt class="col-md-3">Kategorie:</dt>
+        <dd class="col-md-9">
+            {% if categories %}
+                {{ categories }}
+            {% else %}
+                -
+            {% endif %}
+        </dd>
+
         <dt class="col-md-3">Jezyk:</dt>
         <dd class="col-md-9"> {{ book.jezyk.jezyk }}</dd>
 
@@ -45,6 +60,7 @@
         <div class="ml-auto mr-2">
             <a class="btn btn-secondary" href="{{ url_for('books.update_book', book_id=book.id) }}" role="button">Zmień</a>
             <button type="button" class="btn btn-danger m-1" data-toggle="modal" data-target="#deleteModal">Usuń</button>
+
         </div>
     </div>
     {% elif current_user.typ_konta.id == USER_ID %}
@@ -52,13 +68,15 @@
     <div class="row">
         <div class="ml-auto mr-2">
             <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#reserveModal">Rezerwuj</button>
+            <a class="btn btn-info" href="{{ url_for('books.add_opinion', book_id=book.id) }}" role="button">Dodaj opinię</a>
         </div>
     </div>
     {% endif %}
 </div>
-
+    <!-- Add new route for copies !TODO -->
 {% if current_user.typ_konta_id == ADMIN_ID %}
-    <div class="content-section">
+    <div class="col-md-4">
+        <div class="content-section mr-md-1">
         <div class="border-bottom">
             <h4>Wszystkie egzemplarze</h4>
         </div>
@@ -67,17 +85,36 @@
         <thead>
         <tr>
           <th scope="col" class="border-bottom">ID</th>
-          <th scope="col" class="border-bottom">Stan</th>
-          <th scope="col" class="border-bottom">Akcja</th>
+          <th scope="col" class="border-bottom text-center">Stan</th>
+            {% if uid %}
+            <th scope="col" class="border-bottom">ID</th>
+            {% endif %}
         </tr>
         </thead>
 
         <tbody>
             {% for cop in copies %}
             <tr>
-                <td>{{ cop.id }}</td>
-                <td>{{ cop.tytul }}</td>
-                <td>{{ cop.imie }}</td>
+                <td>{{ cop[1] }}</td>
+                <td class="text-center">
+                    {% if cop[2] == true %}
+                        Wypożyczona
+                    {% else %}
+                        W bibliotece
+                    {% endif %}
+                </td>
+                {% if uid %}
+                <td>
+                    {% if cop[2] == false %}
+<!--                        <a class="btn btn-secondary btn-sm" href="{{ url_for('users.borrow_book', uid=uid, bid=cop[0], cid=cop[1]) }}" role="button">Wypożycz</a>-->
+                        <form action="{{ url_for('users.borrow_book', uid=uid, bid=cop[0], cid=cop[1]) }}" method="POST">
+                            <input class="btn btn-secondary btn-sm" type="submit" value="Wypożycz">
+                        </form>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>
@@ -87,8 +124,34 @@
             Brak
         </div>
         {% endif %}
+        </div>
     </div>
+</div>
 {% endif %}
+
+<!--  OPINION  -->
+<div class="">
+    <legend class="border-bottom mb-4 ml-2">Opinie</legend>
+    {% for opinion in opinions %}
+        <article class="media content-section">
+          <div class="media-body">
+            <div class="article-metadata text-secondary">
+              {{ opinion.uzytkownik.nazwa_uzytkownika}}
+                <small class="text-muted ml-2">{{ opinion.data_dodania.strftime('%Y-%m-%d') }}</small>
+                {% if opinion.uzytkownik == current_user or current_user.typ_konta_id == ADMIN_ID %}
+                  <div>
+                    <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{{ url_for('books.update_opinion', opinion_id=opinion.id, book_id=book.id) }}">Zaktualizuj</a>
+                    <a class="btn btn-danger btn-sm mt-1 mb-1" href="{{ url_for('books.delete_opinion', opinion_id=opinion.id, book_id=book.id) }}">Usuń</a>
+                  </div>
+                {% endif %}
+            </div>
+            <p class="article-content">{{ opinion.opinia }}</p>
+          </div>
+        </article>
+    {% endfor %}
+</div>
+
+
 
 
 <!-- ********************************************************************************* -->
@@ -132,4 +195,7 @@
     </div>
   </div>
 </div>
+
+
+
 {% endblock content %}

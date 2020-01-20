@@ -30,7 +30,7 @@ insert into egzemplarze(ksiazka_id, biblioteka_id) VALUES (2, 1);
 insert into egzemplarze(ksiazka_id, biblioteka_id) VALUES (2, 1);
 
 insert into uzytkownicy(imie, nazwisko, pesel, email, adres, nazwa_uzytkownika, haslo, typ_konta_id, biblioteka_id)
-VALUES ('Mariusz', 'Hariusz', '01234567891', 'mail@mail.com', 'Kwiatowa 5', 'Marek', '$2y$12$8AOe1VEj5YSxSlHpdcUsL.n987drqUXi9TLTgnmTsK23ZUwEuhEme', 2, 1);
+VALUES ('Mariusz', 'Hariusz', '01234567891', 'mail@mail.com', 'Kwiatowa 5', 'Marek', '$2y$12$8AOe1VEj5YSxSlHpdcUsL.n987drqUXi9TLTgnmTsK23ZUwEuhEme', 1, 1);
 INSERT INTO uzytkownicy (imie, nazwisko, pesel, email, adres, nazwa_uzytkownika, haslo, typ_konta_id, biblioteka_id)
 VALUES ('Jan', 'Kowalski', '12345678913', 'admin@admin.com', 'Polna 2', 'admin', '$2b$12$I7W8Q3SOF4WmcH/Y5jLqse6gFNT.HZiwxQCAPV3MWCQKGzCCIyplO', 2, 1);
 insert into wypozyczenia(uzytkownik_id, egzemplarz_id, data_wypozyczenia, data_oddania) VALUES (1, 1, '2019-12-20', NULL);

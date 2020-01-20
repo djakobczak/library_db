@@ -5,7 +5,8 @@ from flask_login import current_user
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql import text
 
-from librarydb.models import Ksiazki, Rezerwacje, TypKary, Kary
+from librarydb import db
+from librarydb.models import Ksiazki, Rezerwacje, TypKary, Kary, Wypozyczenia
 
 
 def reserved_books_by_user(db, user_id):
@@ -41,7 +42,7 @@ def reserved_books_by_user_alchemy(db, uid):
     return rbooks_list
 
 
-def user_borrowed_books(db, uid):
+def user_borrowed_books(uid):
     """
     Returns list of borrowed books by user whose id is equel uid.
     :param db:      (object)    : database instance
@@ -51,7 +52,7 @@ def user_borrowed_books(db, uid):
 
     query = text("""
     SELECT 
-        w.uzytkownik_id, k.tytul, w.data_wypozyczenia
+        w.uzytkownik_id, k.tytul, w.data_wypozyczenia, w.id
     FROM
         wypozyczenia w INNER JOIN 
         egzemplarze e ON e.id = w.egzemplarz_id INNER JOIN
@@ -62,6 +63,7 @@ def user_borrowed_books(db, uid):
     ;   
     """)
     result = db.engine.execute(query, uid=uid).fetchall()
+
     return result
 
 
@@ -104,7 +106,6 @@ def update_user_information(db, user, form):
 # sqlalchemy engine execute transaction !TODO
 def cancel_penalty_db(db, uid, pid):
     """
-
     :param db:
     :param uid:     (ind)   : user id
     :param pid:     (int)   : penalty id
@@ -133,7 +134,7 @@ def pay_penalty_db(db, pid):
 def get_payments(db, uid):
     query = text(
         """
-        SELECT * FROM v_platnosci WHERE id=:uid
+        SELECT * FROM v_platnosci WHERE user_id=:uid
         """
     )
     payments = db.engine.execute(query, uid=uid).fetchall()
@@ -144,3 +145,19 @@ def get_payments(db, uid):
         payments_list.append(d)
 
     return payments_list
+
+def return_book_db(lend_id):
+    bbook = Wypozyczenia.query.get(lend_id)
+    bbook.data_oddania = datetime.now()
+
+    return commit_changes()
+
+
+def commit_changes():
+    try:
+        db.session.commit()
+        return True
+    except IntegrityError as e:
+        print(str(e))
+        db.session.rollback()
+        return False
