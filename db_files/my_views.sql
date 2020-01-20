@@ -140,8 +140,10 @@ CREATE OR REPLACE VIEW v_egzemplarze_wypozyczenia as
 
 drop view v_egzemplarze_rezerwacje_wypozyczenia;
 CREATE OR REPLACE VIEW v_egzemplarze_rezerwacje_wypozyczenia as
-	SELECT k.id as ksiazka_id, e.id as egzemplarz_id, EXISTS (select 1 from wypozyczenia w where egzemplarz_id = e.id and data_oddania is null) as czy_wypozyczona,
+	SELECT e.id as egzemplarz_id, EXISTS (select 1 from wypozyczenia w where egzemplarz_id = e.id) as czy_wypozyczona,
 		EXISTS (select 1 from rezerwacje where ksiazka_id = k.id) as czy_rezerwacja_na_ksiazke
 	FROM egzemplarze e
 	INNER JOIN ksiazki k ON k.id = e.ksiazka_id
-	ORDER BY e.id;
+	LEFT JOIN wypozyczenia w ON w.egzemplarz_id = e.id
+	LEFT JOIN rezerwacje r ON r.ksiazka_id = k.id
+	ORDER BY e.id;	

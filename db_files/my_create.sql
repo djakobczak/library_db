@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS autor, typ_kary, kategoria, typ_konta, biblioteki, biblioteka_egzemplarz,
+DROP TABLE IF EXISTS autor, typ_kary, kategoria, typ_konta, biblioteki,
 egzemplarze, jezyk, kary, ksiazka_kategoria, ksiazki, opinie, platnosci, rezerwacje, uzytkownicy,
 wydawca, wypozyczenia CASCADE;
 

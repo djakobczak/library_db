@@ -1,0 +1,7 @@
+librarydb/main/__pycache__/
+librarydb/__pycache__/
+librarydb/books/__pycache__/
+librarydb/users/__pycache__/__init__.cpython-38.pyc
+librarydb/users/__pycache__/forms.cpython-38.pyc
+librarydb/users/__pycache__/routes.cpython-38.pyc
+librarydb/users/__pycache__/utils.cpython-38.pyc
