@@ -31,9 +31,15 @@ insert into egzemplarze(ksiazka_id, biblioteka_id) VALUES (2, 1);
 
 insert into uzytkownicy(imie, nazwisko, pesel, email, adres, nazwa_uzytkownika, haslo, typ_konta_id, biblioteka_id)
 VALUES ('Mariusz', 'Hariusz', '01234567891', 'mail@mail.com', 'Kwiatowa 5', 'Marek', '$2y$12$8AOe1VEj5YSxSlHpdcUsL.n987drqUXi9TLTgnmTsK23ZUwEuhEme', 1, 1);
+insert into uzytkownicy(imie, nazwisko, pesel, email, adres, nazwa_uzytkownika, haslo, typ_konta_id, biblioteka_id)
+VALUES ('User', 'Uzytkownicki', '01234567891', 'user@user.com', 'Kwiatowa 5', 'user', '$2y$12$8AOe1VEj5YSxSlHpdcUsL.n987drqUXi9TLTgnmTsK23ZUwEuhEme', 1, 1);
 INSERT INTO uzytkownicy (imie, nazwisko, pesel, email, adres, nazwa_uzytkownika, haslo, typ_konta_id, biblioteka_id)
 VALUES ('Jan', 'Kowalski', '12345678913', 'admin@admin.com', 'Polna 2', 'admin', '$2b$12$I7W8Q3SOF4WmcH/Y5jLqse6gFNT.HZiwxQCAPV3MWCQKGzCCIyplO', 2, 1);
 insert into wypozyczenia(uzytkownik_id, egzemplarz_id, data_wypozyczenia, data_oddania) VALUES (1, 1, '2019-12-20', NULL);
 insert into wypozyczenia(uzytkownik_id, egzemplarz_id, data_wypozyczenia, data_oddania) VALUES (1, 2, '2019-12-20', NULL);
 insert into rezerwacje(uzytkownik_id, data_rezerwacji, ksiazka_id) VALUES (1,'2019-10-10',2);
 insert into kary(uzytkownik_id, egzemplarz_id, typ_kary_id) VALUES (1,1,1);
+
+INSERT INTO opinie(ksiazka_id, uzytkownik_id, opinia, data_dodania) VALUES (2, 1,'Dla mnie bomba', '1724-02-01');
+INSERT INTO opinie(ksiazka_id, uzytkownik_id, opinia, data_dodania) VALUES (1, 1,'Ta ksiazka odmienila moje życie! POLECAM', '1924-02-01');
+INSERT INTO opinie(ksiazka_id, uzytkownik_id, opinia, data_dodania) VALUES (2, 1,'Średnia', '1424-02-01');
