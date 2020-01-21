@@ -131,14 +131,14 @@ CREATE OR REPLACE VIEW v_kary_nieoplacone as
      LEFT JOIN platnosci p ON p.id_kary = k.id where p.id_kary is null
   ORDER BY u.nazwa_uzytkownika;
 
-	drop view v_egzemplarze_wypozyczenia;
+
 CREATE OR REPLACE VIEW v_egzemplarze_wypozyczenia as
 	SELECT e.id as egzemplarz_id, EXISTS (select 1 from wypozyczenia w where egzemplarz_id = e.id) as czy_wypozyczona
 	FROM egzemplarze e
 	left JOIN wypozyczenia w ON w.egzemplarz_id = e.id
 	ORDER BY e.id;
 
-drop view v_egzemplarze_rezerwacje_wypozyczenia;
+
 CREATE OR REPLACE VIEW v_egzemplarze_rezerwacje_wypozyczenia as
 	SELECT k.id as ksiazka_id, e.id as egzemplarz_id, EXISTS (select 1 from wypozyczenia w where egzemplarz_id = e.id and data_oddania is null) as czy_wypozyczona,
 		EXISTS (select 1 from rezerwacje where ksiazka_id = k.id) as czy_rezerwacja_na_ksiazke
