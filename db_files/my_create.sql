@@ -85,7 +85,8 @@ CREATE TABLE kary
   id serial primary key,
   uzytkownik_id integer REFERENCES uzytkownicy(id),
   egzemplarz_id integer REFERENCES egzemplarze(id),
-  typ_kary_id integer REFERENCES typ_kary(id)
+  typ_kary_id integer REFERENCES typ_kary(id),
+  wysokosc decimal
 );
 
 CREATE TABLE opinie
