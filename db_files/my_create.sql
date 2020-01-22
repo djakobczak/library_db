@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS autor, typ_kary, kategoria, typ_konta, biblioteki, biblioteka_egzemplarz,
+DROP TABLE IF EXISTS autor, typ_kary, kategoria, typ_konta, biblioteki,
 egzemplarze, jezyk, kary, ksiazka_kategoria, ksiazki, opinie, platnosci, rezerwacje, uzytkownicy,
 wydawca, wypozyczenia CASCADE;
 
@@ -85,7 +85,8 @@ CREATE TABLE kary
   id serial primary key,
   uzytkownik_id integer REFERENCES uzytkownicy(id),
   egzemplarz_id integer REFERENCES egzemplarze(id),
-  typ_kary_id integer REFERENCES typ_kary(id)
+  typ_kary_id integer REFERENCES typ_kary(id),
+  wysokosc decimal
 );
 
 CREATE TABLE opinie
@@ -127,3 +128,37 @@ CREATE TABLE ksiazka_kategoria
   ksiazka_id integer REFERENCES ksiazki(id),
   PRIMARY KEY (kategoria_id,ksiazka_id)
 );
+
+--drop trigger t_wypozycz_pierwszej_rezerwacji on wypozyczenia
+--drop function f_wypozycz_pierwszej_rezerwacji()
+create function f_wypozycz_pierwszej_rezerwacji () returns trigger as '
+declare
+begin
+	if new.data_oddania is not null then
+		if (select r.id from wypozyczenia w
+			INNER JOIN egzemplarze e ON e.id = w.egzemplarz_id
+			INNER JOIN ksiazki k ON k.id = e.ksiazka_id
+			INNER JOIN rezerwacje r ON k.id = r.ksiazka_id
+			where w.id = new.id
+			order by data_rezerwacji limit 1) is not null THEN
+				insert into wypozyczenia(uzytkownik_id, egzemplarz_id, data_wypozyczenia, data_oddania) VALUES
+					((select r.uzytkownik_id from wypozyczenia w
+					INNER JOIN egzemplarze e ON e.id = w.egzemplarz_id
+					INNER JOIN ksiazki k ON k.id = e.ksiazka_id
+					INNER JOIN rezerwacje r ON k.id = r.ksiazka_id
+					where w.id = new.id
+					order by data_rezerwacji limit 1), old.egzemplarz_id, current_timestamp, NULL);
+				delete from rezerwacje where id = (select r.id from wypozyczenia w
+			INNER JOIN egzemplarze e ON e.id = w.egzemplarz_id
+			INNER JOIN ksiazki k ON k.id = e.ksiazka_id
+			INNER JOIN rezerwacje r ON k.id = r.ksiazka_id
+			where w.id = new.id
+			order by data_rezerwacji limit 1);
+			END IF;
+	END IF;	
+	RETURN NEW;
+end;
+' language 'plpgsql';
+CREATE TRIGGER t_wypozycz_pierwszej_rezerwacji
+AFTER UPDATE ON wypozyczenia
+    FOR EACH ROW EXECUTE PROCEDURE f_wypozycz_pierwszej_rezerwacji();
