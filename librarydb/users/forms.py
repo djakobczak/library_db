@@ -1,8 +1,9 @@
 from flask_login import current_user
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, SelectField, IntegerField
 from wtforms.validators import DataRequired, Length, Email, ValidationError, EqualTo
 
+from librarydb.books.forms import LIBRARIES_TYPES
 from librarydb.models import Uzytkownicy
 
 
@@ -16,6 +17,7 @@ class RegistrationForm(FlaskForm):
     username = StringField('Nazwa użytkownika')
     password = PasswordField('Hasło', validators=[DataRequired(), Length(min=5)])
     confirm_password = PasswordField('Potwierdź hasło', validators=[DataRequired(), EqualTo('password', message="Hasła muszą się zgadzać")])
+    library_id = SelectField('Biblioteka', choices=LIBRARIES_TYPES)
     submit = SubmitField('Zarejestruj się')
 
     def validate_pin(self, pin):
@@ -43,6 +45,7 @@ class UpdateAccountForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     address = StringField('Adres', validators=[DataRequired()])
     username = StringField('Nazwa użytkownika')
+    library_id = SelectField('Biblioteka', choices=LIBRARIES_TYPES)
     submit = SubmitField('Zaktualizuj')
 
     def validate_pin(self, pin):

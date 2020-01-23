@@ -7,7 +7,18 @@
             <fieldset class="form-group">
                 <legend class="border-bottom mb-4">{{ legend }}</legend>
                 <div class="form-group">
-                    {{ form.bid.label(class="form-control-label") }}
+                    <div class="row">
+
+                         <div class="col-md-2">
+                             {{ form.bid.label(class="form-control-label") }}
+                         </div>
+                         <div class="col-md-10">
+                             <button type="button" class="btn btn-secondary btn-sm mb-1 float-right" data-toggle="modal" data-target="#booksModalLong">
+                              Książki
+                            </button>
+                         </div>
+                     </div>
+
                     {% if form.bid.errors %}
                         {{ form.bid(class="form-control form-control-lg is-invalid") }}
                         <div class="invalid-feedback">
@@ -55,4 +66,44 @@
         </form>
 
     </div>
+
+
+<!-- Books -->
+<div class="modal fade" id="booksModalLong" tabindex="-1" role="dialog" aria-labelledby="booksModalLongTitle" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="booksModalLongTitle">Autorzy</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-sm table-hover table-borderless">
+        <thead>
+        <tr>
+          <th scope="col" class="border-bottom">#</th>
+          <th scope="col" class="border-bottom">Tytuł</th>
+          <th scope="col" class="border-bottom">Autor</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        {% for book in books %}
+        <!-- onclick just to omit jquery -->
+        <tr>
+            <th scope="row">{{ book.id }}</th>
+            <td>{{ book.tytul }}</td>
+            <td>{{ book.autor.imie + ' ' + book.autor.nazwisko }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock content %}

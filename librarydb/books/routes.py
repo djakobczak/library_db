@@ -8,7 +8,7 @@ from datetime import datetime
 from librarydb import app, db
 from librarydb.books.forms import SearchForm, NewBookForm, NewAuthorForm, AddCopiesForm, AddOpinionForm
 from librarydb.books.utils import available_books, insert_author, BooksDb
-from librarydb.models import Ksiazki, Egzemplarze, Rezerwacje, Wypozyczenia, Opinie
+from librarydb.models import Ksiazki, Egzemplarze, Rezerwacje, Wypozyczenia, Opinie, Autor
 from librarydb.settings import *
 
 books = Blueprint('books', __name__)
@@ -18,8 +18,8 @@ books = Blueprint('books', __name__)
 @books.route("/book", methods=['GET', 'POST'])
 @books.route("/book/<int:uid>", methods=['GET', 'POST'])
 def books_list(uid=None):
+    print('UID:', uid)
     page = request.args.get('page', 1, type=int)
-    # cbooks = Book2.query.order_by(Book2.title.asc()).paginate(page=page, per_page=5)
     cbooks = Ksiazki.query.order_by(Ksiazki.tytul.asc()).paginate(page=page, per_page=5)
 
     form = SearchForm()
@@ -46,8 +46,8 @@ def search_results(search_value, uid=None):
     form = SearchForm()
     # search in titles and authors
     search_pattern = "%{}%".format(search_value)
-    search_result = Ksiazki.query.filter((Ksiazki.tytul.like(search_pattern))) \
-        .paginate(page=page, per_page=5)  # | (Ksiazki.autor.like(search_pattern))
+    search_result = Ksiazki.query.filter(Ksiazki.tytul.like(search_pattern)) \
+        .paginate(page=page, per_page=5)
 
     if search_result.total == 0 and request.method == "GET":  # search failed
         flash('Brak wyników wyszukiwania', 'danger')
@@ -164,7 +164,8 @@ def update_book(book_id):
         form.premiere_date.data = book.data_premiery
         form.publication_date.data = book.rok_wydania
         form.lang_id.data = book.jezyk.id
-    return render_template('new_book.html', form=form, legend='Zaktualizuj informacje')
+        authors = Autor.query.all()
+    return render_template('new_book.html', form=form, legend='Zaktualizuj informacje', authors=authors)
 
 
 @books.route("/book/<int:book_id>/delete", methods=['POST'])
@@ -197,9 +198,9 @@ def new_book():
     if current_user.typ_konta_id != ADMIN_ID:  # if common user tries to add book -> content forbidden
         abort(403)
     form = NewBookForm()
+    authors = Autor.query.all()
+
     if form.validate_on_submit():
-        # ans = insert_book(title=form.title.data, author=form.author.data, category=form.category.data,
-        #                   count=form.count.data, description=form.description.data)
         ans = BooksDb.insert_book(title=form.title.data, aid=form.aid.data,
                                   pid=form.pid.data, premiere_date=form.premiere_date.data,
                                   publ_year=form.publication_date.data, ean=form.ean.data,
@@ -210,7 +211,7 @@ def new_book():
             return redirect(url_for('books.new_book'))  # flush fields, simple but slow
         else:
             flash(ROLLBACK_MSG, 'danger')
-    return render_template('new_book.html', form=form, legend='Dodaj nową książkę do bazy')
+    return render_template('new_book.html', form=form, legend='Dodaj nową książkę do bazy', authors=authors)
 
 
 @books.route("/account/new-author", methods=['GET', 'POST'])
@@ -279,6 +280,8 @@ def add_copies():
     if current_user.typ_konta_id != ADMIN_ID:  # if common user tries to add book -> content forbidden
         abort(403)
     form = AddCopiesForm()
+    books = Ksiazki.query.all()
+
     if form.validate_on_submit():
         ans = BooksDb.add_copies(form)
 
@@ -288,4 +291,4 @@ def add_copies():
             return redirect(url_for('books.add_copies'))  # flush fields, simple but slow
         else:
             flash(ROLLBACK_MSG, 'danger')
-    return render_template('add_copies.html', form=form, legend='Dodaj egzemplarze do bazy')
+    return render_template('add_copies.html', form=form, legend='Dodaj egzemplarze do bazy', books=books)

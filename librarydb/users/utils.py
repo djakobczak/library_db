@@ -1,12 +1,11 @@
 # reservation for 3 days?
 from datetime import datetime
 
-from flask_login import current_user
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql import text
 
 from librarydb import db
-from librarydb.models import Ksiazki, Rezerwacje, TypKary, Kary, Wypozyczenia
+from librarydb.models import Ksiazki, Rezerwacje, Wypozyczenia
 
 
 def reserved_books_by_user(db, user_id):
@@ -94,6 +93,7 @@ def update_user_information(db, user, form):
     user.email = form.email.data
     user.adres = form.address.data
     user.nazwa_uzytkownika = form.username.data
+    user.biblioteka_id = form.library_id.data
 
     try:
         db.session.commit()

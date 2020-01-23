@@ -39,9 +39,9 @@
     {% for page_num in books.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
         {% if page_num %}
             {% if books.page == page_num %}
-                <a class="btn btn-success mb-4 mt-2" href="{{ url_for('books.books_list', page=page_num, results=books) }}">{{ page_num }}</a>
+                <a class="btn btn-success mb-4 mt-2" href="{{ url_for('books.books_list', page=page_num, results=books, uid=uid) }}">{{ page_num }}</a>
             {% else %}
-                <a class="btn btn-outline-success mb-4 mt-2" href="{{ url_for('books.books_list', page=page_num, results=books) }}">{{ page_num }}</a>
+                <a class="btn btn-outline-success mb-4 mt-2" href="{{ url_for('books.books_list', page=page_num, results=books, uid=uid) }}">{{ page_num }}</a>
             {% endif %}
         {% else %}
             ...

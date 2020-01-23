@@ -26,7 +26,8 @@ def register():
         user = Uzytkownicy(imie=form.name.data, nazwisko=form.surname.data,
                            pesel=form.pin.data, email=form.email.data,
                            adres=form.address.data, nazwa_uzytkownika=form.username.data,
-                           haslo=hashed_password, typ_konta=TypKonta.query.filter_by(id=1).first())  # 2 means user
+                           haslo=hashed_password, typ_konta=TypKonta.query.filter_by(id=1).first(),
+                           biblioteka_id=form.library_id.data)  # 2 means user
         db.session.add(user)
         db.session.commit()
         # ans = add_user(name=form.name.data, surname=form.surname.data,
@@ -88,11 +89,36 @@ def users_list():
 
     form = SearchUserForm()
     if form.validate_on_submit():
-        pass  # !TODO
-        # return redirect(url_for('books.search_results', search_value=form.search_value.data))
+        return redirect(url_for('users.search_results', search_value=form.search_value.data))
 
     return render_template('users_list.html', title='Czytelnicy', users=users, form=form)
 
+
+@users.route("/users/search/<search_value>", methods=['GET', 'POST'])
+def search_results(search_value):
+    """
+    Route is needed, because of pagination. If we used only books route then after going to
+    e.g. page 2 our search results would be deleted.
+    :param uid:
+    :param search_value:
+    :return:
+    """
+    page = request.args.get('page', 1, type=int)
+    form = SearchUserForm()
+    # search in titles and authors
+    search_pattern = "%{}%".format(search_value)
+    search_result = Uzytkownicy.query.filter(Uzytkownicy.imie.like(search_pattern) |
+                                             Uzytkownicy.nazwisko.like(search_pattern))\
+        .order_by(Uzytkownicy.nazwisko.asc()) \
+        .paginate(page=page, per_page=5)  # | (Ksiazki.autor.like(search_pattern))
+
+    if form.validate_on_submit():
+        return redirect(url_for('users.search_results', search_value=form.search_value.data))
+
+    if search_result.total == 0 and request.method == "GET":  # search failed
+        flash('Brak wyników wyszukiwania', 'danger')
+
+    return render_template('users_list.html', title='Czytelnicy', users=search_result, form=form)
 
 @users.route("/account/users/<int:uid>", methods=['GET', 'POST'])
 @login_required

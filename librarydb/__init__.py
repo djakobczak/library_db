@@ -10,7 +10,7 @@ app.config['SECRET_KEY'] = '31e6ce550f73e318b95cfe6513a2a2d6'
 POSTGRES_USER = 'postgres'
 POSTGRES_PW = 'root'
 POSTGRES_URL = '127.0.0.1:5432'
-POSTGRES_DB = 'my_library'
+POSTGRES_DB = 'library_final'
 DB_URL = 'postgresql+psycopg2://{user}:{pw}@{url}/{db}'.format(user=POSTGRES_USER,
                                                                pw=POSTGRES_PW,
                                                                url=POSTGRES_URL,

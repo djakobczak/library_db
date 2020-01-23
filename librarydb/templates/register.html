@@ -89,6 +89,7 @@
                         {{ form.username (class="form-control form-control-lg") }}
                     {% endif %}
                 </div>
+
                 <!-- if admin is logged in that means he accessed this page in order to change update user account -->
                 {% if not current_user.typ_konta_id == ADMIN_ID %}
                 <div class="form-group">
@@ -119,6 +120,19 @@
                     {% endif %}
                 </div>
                 {% endif %}
+                <div class="form-group">
+                    {{ form.library_id.label(class="form-control-label") }}
+                    {% if form.library_id.errors %}
+                        {{ form.library_id(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.library_id.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.library_id(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
             </fieldset>
             <div class="form-group">
                 {{ form.submit(class="btn btn-outline-info") }}

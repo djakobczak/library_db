@@ -21,7 +21,18 @@
                 </div>
 
                  <div class="form-group">
-                    {{ form.aid.label(class="form-control-label") }}
+                     <div class="row">
+
+                         <div class="col-md-2">
+                             {{ form.aid.label(class="form-control-label") }}
+                         </div>
+                         <div class="col-md-10">
+                             <button type="button" class="btn btn-secondary btn-sm mb-2 float-right" data-toggle="modal" data-target="#authorsModalLong">
+                              Autorzy
+                            </button>
+                         </div>
+                     </div>
+
                     {% if form.aid.errors %}
                         {{ form.aid(class="form-control form-control-lg is-invalid") }}
                         <div class="invalid-feedback">
@@ -111,4 +122,44 @@
         </form>
 
     </div>
+
+
+<!-- Authors -->
+<div class="modal fade" id="authorsModalLong" tabindex="-1" role="dialog" aria-labelledby="authorsModalLongTitle" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="authorsModalLongTitle">Autorzy</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-sm table-hover table-borderless">
+        <thead>
+        <tr>
+          <th scope="col" class="border-bottom">#</th>
+          <th scope="col" class="border-bottom">Imię</th>
+          <th scope="col" class="border-bottom">Nazwisko</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        {% for author in authors %}
+        <!-- onclick just to omit jquery -->
+        <tr>
+            <th scope="row">{{ author.id }}</th>
+            <td>{{ author.imie }}</td>
+            <td>{{ author.nazwisko }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Zamknij</button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock content %}
