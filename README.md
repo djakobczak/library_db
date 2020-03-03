@@ -4,7 +4,7 @@ The main goal of this project was to create simple system that allows to manage 
  
  # Instalation
  Check the file `requirements.txt` and follow it.
- Next step is to create local postgresql database (check `librarydb/__init__.py` file for database config i.e. password, database name, address and username) 
+ Next step is to create local postgresql database (check `librarydb/__init__.py` file for database config i.e. password, database name, address and username). Then you should load database files (`db_files/my_create.sql`, `db_files/my_insert.sql`, `db_files/my_views.sql`).
 
 # Run
 To start the application you have to start web server by typing `python run.py` in your cmd. It should run localhost server at port `5000`. 
